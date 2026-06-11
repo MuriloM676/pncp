@@ -1,19 +1,32 @@
 <?php
 
-$cnpj = $_GET['cnpj'] ?? '';
-$ano = $_GET['ano'] ?? '';
-$sequencial = $_GET['sequencial'] ?? '';
+$id = $_GET['id'] ?? '';
 
-// MOCK DETALHES
-$mockDetalhe = [
-    'numeroCompra' => "{$sequencial}/{$ano}",
-    'objeto' => 'Aquisição de materiais de escritório e papelaria para diversas unidades administrativas. Inclui papel A4, canetas, pastas e outros itens essenciais para o funcionamento diário.',
-    'dataAberturaPropostas' => date('c', strtotime('+5 days')),
-    'nomeOrgao' => 'Órgão de Exemplo via Mock',
-    'municipioNome' => 'Cidade Exemplo',
-    'siglaUf' => 'SP',
-    'valorEstimado' => 15500.50,
-    'informacoesComplementares' => 'Este é um dado de exemplo exibido porque a API oficial do governo está temporariamente fora do ar (Timeout 504).'
-];
+if (!$id) {
+    header('HTTP/1.1 400 Bad Request');
+    echo json_encode(['error' => 'id is required.']);
+    exit;
+}
 
-echo json_encode($mockDetalhe);
+$cacheKey = "processo:{$id}";
+$ttl = $config['cache_ttl']['processo'];
+
+$data = $cache->get($cacheKey);
+
+if (!$data) {
+    // Endpoint para consultar detalhes de uma contratação específica por ID
+    // Rota: /modulo-contratacoes/1.1_consultarContratacoes_PNCP_14133_Id
+    $endpoint = "modulo-contratacoes/1.1_consultarContratacoes_PNCP_14133_Id";
+    $data = $client->request($endpoint, ['id' => $id]);
+    
+    if ($data && isset($data['resultado'])) {
+        $cache->set($cacheKey, $data, $ttl);
+    }
+}
+
+if ($data && isset($data['resultado'])) {
+    echo json_encode($data['resultado']);
+} else {
+    header('HTTP/1.1 404 Not Found');
+    echo json_encode(['error' => 'Process not found on Compras.gov.br API.']);
+}

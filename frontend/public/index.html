@@ -43,15 +43,15 @@
 
         <!-- Grid de Oportunidades -->
         <div x-show="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <template x-for="op in oportunidades?.data" :key="op.numeroCompra">
+            <template x-for="op in oportunidades" :key="op.id">
                 <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" @click="openModal(op)">
                     <div class="p-5">
                         <div class="flex justify-between items-start mb-2">
-                            <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded" x-text="op.unidadeOrgao.ufSigla"></span>
+                            <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded" x-text="op.siglaUf"></span>
                             <span class="text-gray-500 text-xs" x-text="formatDate(op.dataPublicacaoPncp)"></span>
                         </div>
-                        <h2 class="text-lg font-bold mb-2 line-clamp-2" x-text="op.objeto"></h2>
-                        <p class="text-sm text-gray-600 mb-4" x-text="op.orgaoEntidade.razaoSocial"></p>
+                        <h2 class="text-lg font-bold mb-2 line-clamp-2" x-text="op.objetoContratacao"></h2>
+                        <p class="text-sm text-gray-600 mb-4" x-text="op.nomeRazaoSocialOrgao"></p>
                         
                         <div class="flex justify-between items-center mt-4">
                             <div class="text-blue-600 font-bold" x-text="formatCurrency(op.valorTotalEstimado)"></div>
@@ -167,7 +167,10 @@
                     this.error = null;
                     try {
                         const response = await fetch(`${this.apiUrl}/oportunidades?uf=${this.filterUf}`);
-                        if (!response.ok) throw new Error('Falha ao carregar oportunidades');
+                        if (!response.ok) {
+                            const errData = await response.json();
+                            throw new Error(errData.error || 'Falha ao carregar oportunidades');
+                        }
                         this.oportunidades = await response.json();
                         this.countdown = 300;
                     } catch (e) {
@@ -177,20 +180,26 @@
                     }
                 },
 
-                async openModal(idLicitacao) {
+                async openModal(op) {
                     this.modalOpen = true;
                     this.modalLoading = true;
                     this.processoDetalhe = null;
                     this.disputas = [];
                     
                     try {
-                        const [resProc, resDisp] = await Promise.all([
-                            fetch(`${this.apiUrl}/processo?idLicitacao=${idLicitacao}`),
-                            fetch(`${this.apiUrl}/disputa?idLicitacao=${idLicitacao}`)
-                        ]);
-                        
-                        if (resProc.ok) this.processoDetalhe = await resProc.json();
-                        if (resDisp.ok) this.disputas = await resDisp.json();
+                        const resProc = await fetch(`${this.apiUrl}/processo?id=${op.id}`);
+                        if (resProc.ok) {
+                            const data = await resProc.json();
+                            this.processoDetalhe = {
+                                objeto: data.objetoContratacao,
+                                nomeOrgao: data.nomeRazaoSocialOrgao,
+                                municipioNome: data.nomeMunicipio,
+                                siglaUf: data.siglaUf,
+                                valorEstimado: data.valorTotalEstimado,
+                                dataAberturaPropostas: data.dataPublicacaoPncp,
+                                numeroLicitacao: data.numeroCompra
+                            };
+                        }
                     } catch (e) {
                         console.error('Erro ao carregar detalhes:', e);
                     } finally {

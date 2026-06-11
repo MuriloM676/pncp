@@ -2,8 +2,9 @@
 
 return [
     'pncp' => [
-        'base_url' => getenv('PNCP_BASE_URL') ?: 'https://pncp.gov.br/api/pncp/v1/',
+        'base_url' => getenv('PNCP_BASE_URL') ?: 'https://dadosabertos.compras.gov.br/',
     ],
+
     'redis' => [
         'host' => getenv('REDIS_HOST') ?: 'redis',
         'port' => getenv('REDIS_PORT') ?: 6379,
