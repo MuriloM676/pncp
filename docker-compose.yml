@@ -1,0 +1,51 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: pncp-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - pncp-network
+
+  backend:
+    build:
+      context: ./backend
+    container_name: pncp-backend
+    ports:
+      - "8080:80"
+    volumes:
+      - ./backend:/var/www/html
+      - backend-logs:/var/www/html/logs
+    env_file:
+      - .env
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - pncp-network
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: pncp-frontend
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend/public:/usr/share/nginx/html
+    networks:
+      - pncp-network
+
+networks:
+  pncp-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+  backend-logs:

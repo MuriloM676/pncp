@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal PNCP - Oportunidades</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div x-data="pncpApp()" x-init="init()" class="container mx-auto px-4 py-8">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <h1 class="text-3xl font-bold text-blue-800">PNCP Oportunidades</h1>
+            
+            <div class="flex items-center gap-4">
+                <select x-model="filterUf" @change="fetchOportunidades()" class="rounded border-gray-300 py-2 px-4 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">Brasil (Todos)</option>
+                    <template x-for="uf in ufs" :key="uf">
+                        <option :value="uf" x-text="uf"></option>
+                    </template>
+                </select>
+                
+                <div class="text-sm text-gray-500">
+                    Refresh em: <span x-text="countdown"></span>s
+                </div>
+            </div>
+        </header>
+
+        <!-- Loading State -->
+        <div x-show="loading" class="flex justify-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-800"></div>
+        </div>
+
+        <!-- Error State -->
+        <div x-show="error" x-cloak class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6">
+            <strong class="font-bold">Erro!</strong>
+            <span class="block sm:inline" x-text="error"></span>
+            <button @click="fetchOportunidades()" class="underline ml-2">Tentar novamente</button>
+        </div>
+
+        <!-- Grid de Oportunidades -->
+        <div x-show="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <template x-for="op in oportunidades?.data" :key="op.numeroCompra">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" @click="openModal(op)">
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded" x-text="op.unidadeOrgao.ufSigla"></span>
+                            <span class="text-gray-500 text-xs" x-text="formatDate(op.dataPublicacaoPncp)"></span>
+                        </div>
+                        <h2 class="text-lg font-bold mb-2 line-clamp-2" x-text="op.objeto"></h2>
+                        <p class="text-sm text-gray-600 mb-4" x-text="op.orgaoEntidade.razaoSocial"></p>
+                        
+                        <div class="flex justify-between items-center mt-4">
+                            <div class="text-blue-600 font-bold" x-text="formatCurrency(op.valorTotalEstimado)"></div>
+                            <span class="text-xs text-gray-400" x-text="op.numeroCompra"></span>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- Modal de Detalhes -->
+        <div x-show="modalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50" @keydown.escape.window="modalOpen = false">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" @click.away="modalOpen = false">
+                <div class="p-6 border-b flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-gray-800" x-text="'Processo ' + (processoDetalhe?.numeroLicitacao || '')"></h3>
+                    <button @click="modalOpen = false" class="text-gray-500 hover:text-gray-800">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                
+                <div class="p-6 overflow-y-auto flex-grow">
+                    <div x-show="modalLoading" class="flex justify-center py-8">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-800"></div>
+                    </div>
+                    
+                    <div x-show="!modalLoading && processoDetalhe" class="space-y-6">
+                        <section>
+                            <h4 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">Objeto</h4>
+                            <p class="text-gray-800 leading-relaxed" x-text="processoDetalhe?.objeto"></p>
+                        </section>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <h4 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-1">Órgão</h4>
+                                <p x-text="processoDetalhe?.nomeOrgao"></p>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-1">Localidade</h4>
+                                <p x-text="processoDetalhe?.municipioNome + ' / ' + processoDetalhe?.siglaUf"></p>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-1">Valor Estimado</h4>
+                                <p class="text-lg font-bold text-green-600" x-text="formatCurrency(processoDetalhe?.valorEstimado)"></p>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-1">Data de Abertura</h4>
+                                <p x-text="formatDate(processoDetalhe?.dataAberturaPropostas)"></p>
+                            </div>
+                        </div>
+
+                        <!-- Itens em Disputa / Lances -->
+                        <section x-show="disputas.length > 0">
+                            <h4 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Itens em Disputa</h4>
+                            <div class="border rounded-lg overflow-hidden">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Item</th>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Descrição</th>
+                                            <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Melhor Lance</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        <template x-for="item in disputas" :key="item.idItem">
+                                            <tr>
+                                                <td class="px-4 py-2 text-sm text-gray-900" x-text="item.numeroItem"></td>
+                                                <td class="px-4 py-2 text-sm text-gray-500" x-text="item.descricao"></td>
+                                                <td class="px-4 py-2 text-sm text-right font-bold text-blue-600" x-text="formatCurrency(item.valorMelhorLance)"></td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+
+                <div class="p-6 border-t bg-gray-50 flex justify-end">
+                    <button @click="modalOpen = false" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function pncpApp() {
+            return {
+                oportunidades: [],
+                loading: false,
+                error: null,
+                filterUf: '',
+                countdown: 300,
+                modalOpen: false,
+                modalLoading: false,
+                processoDetalhe: null,
+                disputas: [],
+                ufs: ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'],
+                apiUrl: 'http://localhost:8080',
+
+                init() {
+                    this.fetchOportunidades();
+                    setInterval(() => {
+                        if (this.countdown > 0) {
+                            this.countdown--;
+                        } else {
+                            this.fetchOportunidades();
+                        }
+                    }, 1000);
+                },
+
+                async fetchOportunidades() {
+                    this.loading = true;
+                    this.error = null;
+                    try {
+                        const response = await fetch(`${this.apiUrl}/oportunidades?uf=${this.filterUf}`);
+                        if (!response.ok) throw new Error('Falha ao carregar oportunidades');
+                        this.oportunidades = await response.json();
+                        this.countdown = 300;
+                    } catch (e) {
+                        this.error = e.message;
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async openModal(idLicitacao) {
+                    this.modalOpen = true;
+                    this.modalLoading = true;
+                    this.processoDetalhe = null;
+                    this.disputas = [];
+                    
+                    try {
+                        const [resProc, resDisp] = await Promise.all([
+                            fetch(`${this.apiUrl}/processo?idLicitacao=${idLicitacao}`),
+                            fetch(`${this.apiUrl}/disputa?idLicitacao=${idLicitacao}`)
+                        ]);
+                        
+                        if (resProc.ok) this.processoDetalhe = await resProc.json();
+                        if (resDisp.ok) this.disputas = await resDisp.json();
+                    } catch (e) {
+                        console.error('Erro ao carregar detalhes:', e);
+                    } finally {
+                        this.modalLoading = false;
+                    }
+                },
+
+                formatCurrency(value) {
+                    if (!value) return 'R$ 0,00';
+                    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+                },
+
+                formatDate(dateStr) {
+                    if (!dateStr) return '';
+                    return new Date(dateStr).toLocaleString('pt-BR');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
