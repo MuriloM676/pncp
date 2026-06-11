@@ -1,0 +1,506 @@
+/v3/api-docs
+Explore
+API Compras.gov.br
+ 1.0.0 
+OAS 3.1
+/v3/api-docs
+Compras Públicas em Dados Abertos
+
+Servers
+
+https://dadosabertos.compras.gov.br - Generated server url
+
+Authorize
+01 - CATÁLOGO - MATERIAL
+Catálogo de Materiais (CATMAT): Consulta itens de materiais com dados detalhados.
+
+
+
+GET
+/modulo-material/1_consultarGrupoMaterial
+
+
+GET
+/modulo-material/2_consultarClasseMaterial
+
+
+GET
+/modulo-material/3_consultarPdmMaterial
+
+
+GET
+/modulo-material/4_consultarItemMaterial
+
+
+GET
+/modulo-material/5_consultarMaterialNaturezaDespesa
+
+
+GET
+/modulo-material/6_consultarMaterialUnidadeFornecimento
+
+
+GET
+/modulo-material/7_consultarMaterialCaracteristicas
+
+02 - CATÁLOGO - SERVIÇO
+Catálogo de Serviços (CATSER): Consulta serviços com informações detalhadas.
+
+
+
+GET
+/modulo-servico/1_consultarSecaoServico
+
+
+GET
+/modulo-servico/2_consultarDivisaoServico
+
+
+GET
+/modulo-servico/3_consultarGrupoServico
+
+
+GET
+/modulo-servico/4_consultarClasseServico
+
+
+GET
+/modulo-servico/5_consultarSubClasseServico
+
+
+GET
+/modulo-servico/6_consultarItemServico
+
+
+GET
+/modulo-servico/7_consultarUndMedidaServico
+
+
+GET
+/modulo-servico/8_consultarNaturezaDespesaServico
+
+03 - PESQUISA DE PREÇO - PREÇOS PRATICADOS
+Consulta preços praticados nas compras públicas por códigos de itens do CATMAT e CATSER.
+
+
+
+GET
+/modulo-pesquisa-preco/1_consultarMaterial
+
+
+GET
+/modulo-pesquisa-preco/1.1_consultarMaterial_CSV
+
+
+GET
+/modulo-pesquisa-preco/2_consultarMaterialDetalhe
+
+
+GET
+/modulo-pesquisa-preco/2.1_consultarMaterialDetalhe_CSV
+
+
+GET
+/modulo-pesquisa-preco/3_consultarServico
+
+
+GET
+/modulo-pesquisa-preco/3.1_consultarServico_CSV
+
+
+GET
+/modulo-pesquisa-preco/4_consultarServicoDetalhe
+
+
+GET
+/modulo-pesquisa-preco/4.1_consultarServicoDetalhe_CSV
+
+04 - PGC
+Consulta dados sobre Planejamento e Gerenciamento de Contratações (PGC).
+
+
+
+GET
+/modulo-pgc/1_consultarPgcDetalhe
+
+
+GET
+/modulo-pgc/1.1_consultarPgcDetalhe_CSV
+
+
+GET
+/modulo-pgc/2_consultarPgcDetalheCatalogo
+
+
+GET
+/modulo-pgc/2.1_consultarPgcDetalheCatalogo_CSV
+
+
+GET
+/modulo-pgc/3_consultarPgcAgregacao
+
+
+GET
+/modulo-pgc/3.1_consultarPgcAgregacao_CSV
+
+05 - UASG
+Consulta dados sobre Unidades Administrativas de Serviços Gerais (UASG).
+
+
+
+GET
+/modulo-uasg/1_consultarUasg
+
+
+GET
+/modulo-uasg/1.1_consultarUasg_CSV
+
+
+GET
+/modulo-uasg/2_consultarOrgao
+
+
+GET
+/modulo-uasg/2.1_consultarOrgao_CSV
+
+06 - LEGADO
+Consulta licitações realizadas sob a Lei nº 8.666/1993 e leis anteriores à Lei nº 14.133/2021.
+
+
+
+GET
+/modulo-legado/1_consultarLicitacao
+
+
+GET
+/modulo-legado/1.1_consultarLicitacao_Id
+
+
+GET
+/modulo-legado/2_consultarItemLicitacao
+
+
+GET
+/modulo-legado/2.1_consultarItemLicitacao_Id
+
+
+GET
+/modulo-legado/3_consultarPregoes
+
+
+GET
+/modulo-legado/3.1_consultarPregoes_Id
+
+
+GET
+/modulo-legado/4_consultarItensPregoes
+
+
+GET
+/modulo-legado/4.1_consultarItensPregoes_Id
+
+
+GET
+/modulo-legado/5_consultarComprasSemLicitacao
+
+
+GET
+/modulo-legado/5.1_consultarCompraSemLicitacao_Id
+
+
+GET
+/modulo-legado/6_consultarCompraItensSemLicitacao
+
+
+GET
+/modulo-legado/6.1_consultarItensComprasSemLicitacao_Id
+
+
+GET
+/modulo-legado/7_consultarRdc
+
+07 - CONTRATAÇÕES
+Consulta contratações realizadas sob a Lei nº 14.133/2021.
+
+
+
+GET
+/modulo-contratacoes/1_consultarContratacoes_PNCP_14133
+
+
+GET
+/modulo-contratacoes/1.1_consultarContratacoes_PNCP_14133_Id
+
+
+GET
+/modulo-contratacoes/2_consultarItensContratacoes_PNCP_14133
+
+
+GET
+/modulo-contratacoes/2.1_consultarItensContratacoes_PNCP_14133_Id
+
+
+GET
+/modulo-contratacoes/3_consultarResultadoItensContratacoes_PNCP_14133
+
+
+GET
+/modulo-contratacoes/3.1_consultarResultadoItensContratacoes_PNCP_14133_Id
+
+08 - ARP
+Consulta Atas de Registro de Preços (ARP) e seus respectivos itens.
+
+
+
+GET
+/modulo-arp/1_consultarARP
+
+
+GET
+/modulo-arp/1.1_consultarARP_Id
+
+
+GET
+/modulo-arp/1.2_consultarARP_FimVigencia
+
+
+GET
+/modulo-arp/2_consultarARPItem
+
+
+GET
+/modulo-arp/2.1_consultarARPItem_Id
+
+
+GET
+/modulo-arp/3_consultarUnidadesItem
+
+
+GET
+/modulo-arp/4_consultarEmpenhosSaldoItem
+
+
+GET
+/modulo-arp/5_consultarAdesoesItem
+
+09 - CONTRATOS
+Consulta contratos e seus respectivos itens.
+
+
+
+GET
+/modulo-contratos/1_consultarContratos
+
+
+GET
+/modulo-contratos/1.1_consultarContratos_Id
+
+
+GET
+/modulo-contratos/1.2_consultarContratos_FimVigencia
+
+
+GET
+/modulo-contratos/2_consultarContratosItem
+
+
+GET
+/modulo-contratos/2.1_consultarContratosItem_Id
+
+10 - FORNECEDOR
+Consulta fornecedores registrados.
+
+
+
+GET
+/modulo-fornecedor/1_consultarFornecedor
+
+11 - OCDS
+Consulta contratações no formato OCDS (Open Contracting Data Standard).
+
+
+
+GET
+/modulo-ocds/1_releases
+
+97 - INDICADORES
+Este módulo expõe endpoints de indicadores de uso e desempenho da API Compras V2.
+
+
+
+GET
+/modulo-indicadores/1_consultarIndicadoresConsolidados
+
+
+GET
+/modulo-indicadores/2_consultarIndicadoresPorPeriodo
+
+98 - ALICE
+Serviços de integração Analisador de Licitações, Contratos e Editais (Alice) e Compras.gov.
+
+
+
+GET
+/alice/avisos-restritos
+
+
+
+GET
+/alice/compras
+
+
+
+GET
+/alice/tickets
+
+
+99 - USUARIOS
+Serviço de gestão de usuários.
+
+
+
+PATCH
+/usuarios/atualizar/{id}
+
+
+
+GET
+/usuarios/consultar
+
+
+
+POST
+/usuarios/criar
+
+
+
+PATCH
+/usuarios/resetSenha/{id}
+
+
+AUTENTICACAO
+Descrição do serviço de autenticação de usuários
+
+
+
+POST
+/autenticacao/login
+
+
+Schemas
+UsuariosDTOExpand allobject
+UsuariosDTOResponseExpand allobject
+AutenticacaoDTOExpand allobject
+UsuariosResponseDTOExpand allobject
+DmCorpOrgaoAPIResponseDTOExpand allobject
+DmCorpOrgaoDTOExpand allobject
+DmCorpUasgAPIResponseDTOExpand allobject
+DmCorpUasgDTOExpand allobject
+DmServicoNaturezaDespesaAPIResponseDTOExpand allobject
+DmServicoNaturezaDespesaDTOExpand allobject
+DmServicoUndMedidaAPIResponseDTOExpand allobject
+DmServicoUndMedidaDTOExpand allobject
+DmServicoItemAPIResponseDTOExpand allobject
+DmServicoItemDTOExpand allobject
+DmServicoSubClasseAPIResponseDTOExpand allobject
+DmServicoSubClasseDTOExpand allobject
+DmServicoClasseAPIResponseDTOExpand allobject
+DmServicoClasseDTOExpand allobject
+DmServicoGrupoAPIResponseDTOExpand allobject
+DmServicoGrupoDTOExpand allobject
+DmServicoDivisaoAPIResponseDTOExpand allobject
+DmServicoDivisaoDTOExpand allobject
+DmServicoSecaoAPIResponseDTOExpand allobject
+DmServicoSecaoDTOExpand allobject
+FtPgcAgregacaoDTOExpand allobject
+GenericAPIResponseDTOFtPgcAgregacaoDTOExpand allobject
+FtPgcDetalheDTOExpand allobject
+GenericAPIResponseDTOFtPgcDetalheDTOExpand allobject
+FtPesqPrecoCompraServicoDetalheDTOExpand allobject
+GenericAPIResponseDTOFtPesqPrecoCompraServicoDetalheDTOExpand allobject
+FtPesqPrecoCompraServicoDTOExpand allobject
+GenericAPIResponseDTOFtPesqPrecoCompraServicoDTOExpand allobject
+FtPesqPrecoCompraMaterialDetalheDTOExpand allobject
+GenericAPIResponseDTOFtPesqPrecoCompraMaterialDetalheDTOExpand allobject
+FtPesqPrecoCompraMaterialDTOExpand allobject
+GenericAPIResponseDTOFtPesqPrecoCompraMaterialDTOExpand allobject
+AdditionalIdentifierDTOExpand allobject
+AddressDTOExpand allobject
+AwardDTOExpand allobject
+BuyerDTOExpand allobject
+ClassificationDTOExpand allobject
+DetailsDTOExpand allobject
+IdentifierDTOExpand allobject
+ItemDTOExpand allobject
+LinksDTOExpand allobject
+LotDTOExpand allobject
+OtherRequirementsExpand allobject
+PartyDTOExpand allobject
+ProcuringEntityDTOExpand allobject
+PublisherDTOExpand allobject
+ReleaseDTOExpand allobject
+SubcontractingTermsExpand allobject
+SupplierDTOExpand allobject
+SustainabilityExpand allobject
+TenderDTOExpand allobject
+TenderPeriodDTOExpand allobject
+UnitDTOExpand allobject
+ValueDTOExpand allobject
+VwOCDSApiResponseDTOExpand allobject
+DmMaterialCaracteristicasDTOExpand allobject
+GenericAPIResponseDTODmMaterialCaracteristicasDTOExpand allobject
+DmMaterialUnidadeFornecimentoAPIResponseDTOExpand allobject
+DmMaterialUnidadeFornecimentoDTOExpand allobject
+DmMaterialNaturezaDespesaAPIResponseDTOExpand allobject
+DmMaterialNaturezaDespesaDTOExpand allobject
+DmMaterialItemAPIResponseDTOExpand allobject
+DmMaterialItemDTOExpand allobject
+DmMaterialPDMAPIResponseDTOExpand allobject
+DmMaterialPDMDTOExpand allobject
+DmMaterialClasseDTOExpand allobject
+GenericAPIResponseDTODmMaterialClasseDTOExpand allobject
+DmMaterialGrupoDTOExpand allobject
+GenericAPIResponseDTODmMaterialGrupoDTOExpand allobject
+GenericAPIResponseDTOTbVwRdcDTOExpand allobject
+TbVwRdcDTOExpand allobject
+GenericAPIResponseDTOTbVwCompraItensSemLicitacaoDTOExpand allobject
+TbVwCompraItensSemLicitacaoDTOExpand allobject
+GenericAPIResponseDTOTbVwComprasSemLicitacaoDTOExpand allobject
+TbVwComprasSemLicitacaoDTOExpand allobject
+GenericAPIResponseDTOTbVwItensPregaoDTOExpand allobject
+TbVwItensPregaoDTOExpand allobject
+GenericAPIResponseDTOTbVwPregaoDTOExpand allobject
+TbVwPregaoDTOExpand allobject
+GenericAPIResponseDTOTbVwItemLicitacaoDTOExpand allobject
+TbVwItemLicitacaoDTOExpand allobject
+GenericAPIResponseDTOTbVwLicitacaoDTOExpand allobject
+TbVwLicitacaoDTOExpand allobject
+GenericAPIResponseDTOVwKpisConsolidadosDTOExpand allobject
+VwKpisConsolidadosDTOExpand allobject
+GenericAPIResponseDTOVwKpisGeralDTOExpand allobject
+VwKpisGeralDTOExpand allobject
+GenericAPIResponseDTOVwFtFornecedorDTOExpand allobject
+VwFtFornecedorDTOExpand allobject
+GenericAPIResponseDTOVwFtContratoItemDTOExpand allobject
+VwFtContratoItemDTOExpand allobject
+GenericAPIResponseDTOVwFtContratoDTOExpand allobject
+VwFtContratoDTOExpand allobject
+VwDmPNCPItemResultadoAPIResponseDTOExpand allobject
+VwDmPNCPItemResultadoDTOExpand allobject
+GenericAPIResponseDTOVwFtPNCPCompraItemDTOExpand allobject
+VwFtPNCPCompraItemDTOExpand allobject
+GenericAPIResponseDTOVwFtPNCPCompraDTOExpand allobject
+VwFtPNCPCompraDTOExpand allobject
+VwFtArpAdesoesItemAPIResponseDTOExpand allobject
+VwFtArpAdesoesItemDTOExpand allobject
+VwArpEmpenhosItemAPIExpand allobject
+VwArpEmpenhosItemDTOExpand allobject
+VwFtArpUnidadesItemAPIResponseDTOExpand allobject
+VwFtArpUnidadesItemDTOExpand allobject
+GenericAPIResponseDTOVwFtArpItemDTOExpand allobject
+VwFtArpItemDTOExpand allobject
+GenericAPIResponseDTOVwFtArpDTOExpand allobject
+VwFtArpDTOExpand allobject
+AnaliseAliceComItensResponseDTOExpand allobject
+AvisosVwDTOExpand allobject
+AnaliseAliceSemItensResponseDTOExpand allobject

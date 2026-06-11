@@ -16,7 +16,7 @@ if (!$data) {
     ];
     if ($uf) $params['uf'] = $uf;
     
-    $data = $client->request('modulo-contratacoes/1_consultarContratacoes_PNCP_14133', $params);
+    $data = $comprasClient->getContratacoes($params);
     
     if ($data && isset($data['resultado'])) {
         $cache->set($cacheKey, $data, $ttl);

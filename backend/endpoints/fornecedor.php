@@ -13,7 +13,7 @@ $ttl = $config['cache_ttl']['fornecedor'];
 $data = $cache->get($cacheKey);
 
 if (!$data) {
-    $data = $client->request('processosFornecedor', ['documentoFornecedor' => $cnpj]);
+    $data = $comprasClient->getFornecedor($cnpj);
     if ($data) {
         $cache->set($cacheKey, $data, $ttl);
     }

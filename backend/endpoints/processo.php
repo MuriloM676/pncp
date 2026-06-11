@@ -14,15 +14,13 @@ $ttl = $config['cache_ttl']['processo'];
 $data = $cache->get($cacheKey);
 
 if (!$data) {
-    // Endpoint para consultar detalhes de uma contratação específica por ID
-    // Rota: /modulo-contratacoes/1.1_consultarContratacoes_PNCP_14133_Id
-    $endpoint = "modulo-contratacoes/1.1_consultarContratacoes_PNCP_14133_Id";
-    $data = $client->request($endpoint, ['id' => $id]);
-    
-    if ($data && isset($data['resultado'])) {
+    $data = $comprasClient->getContratacaoPorId($id);
+
+    if ($data) {
         $cache->set($cacheKey, $data, $ttl);
     }
 }
+
 
 if ($data && isset($data['resultado'])) {
     echo json_encode($data['resultado']);
