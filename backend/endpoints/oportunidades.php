@@ -24,9 +24,9 @@ if (!$data) {
 }
 
 if ($data && isset($data['resultado'])) {
-    echo json_encode($data['resultado']);
+    echo json_encode($data);
 } else {
     header('HTTP/1.1 502 Bad Gateway');
-    $msg = $data['message'] ?? 'Could not fetch data from Compras.gov.br API.';
+    $msg = ($data && isset($data['message'])) ? $data['message'] : 'Could not fetch data from Compras.gov.br API.';
     echo json_encode(['error' => $msg]);
 }

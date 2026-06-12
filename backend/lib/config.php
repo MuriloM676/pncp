@@ -2,7 +2,10 @@
 
 return [
     'pncp' => [
-        'base_url' => getenv('PNCP_BASE_URL') ?: 'https://dadosabertos.compras.gov.br/',
+        'base_url' => getenv('PNCP_BASE_URL') ?: 'https://pncp.gov.br/api/pncp/',
+    ],
+    'comprasgov' => [
+        'base_url' => getenv('COMPRASGOV_BASE_URL') ?: 'https://dadosabertos.compras.gov.br/',
     ],
 
     'redis' => [

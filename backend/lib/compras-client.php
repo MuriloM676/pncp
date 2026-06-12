@@ -97,4 +97,19 @@ class ComprasGovClient {
     public function getClassesMaterial($params = []) {
         return $this->request('modulo-material', '2_consultarClasseMaterial', $params);
     }
+
+    // --- Módulo Fornecedor ---
+    public function getFornecedor($cnpj) {
+        return $this->request('modulo-fornecedor', '1_consultarFornecedor', [
+            'cnpj' => $cnpj
+        ]);
+    }
+
+    // --- Módulo Material (Busca PDM) ---
+    public function getPdmMaterial($descricao, $pagina = 1) {
+        return $this->request('modulo-material', '3_consultarPdmMaterial', [
+            'pdm_descricao' => $descricao,
+            'pagina' => $pagina
+        ]);
+    }
 }

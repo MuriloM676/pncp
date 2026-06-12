@@ -15,12 +15,7 @@ $ttl = 3600; // Catálogo muda pouco
 $data = $cache->get($cacheKey);
 
 if (!$data) {
-    $params = [
-        'pdm_descricao' => $descricao,
-        'pagina' => $pagina
-    ];
-    
-    $data = $comprasClient->request('modulo-material/3_consultarPdmMaterial', $params);
+    $data = $comprasClient->getPdmMaterial($descricao, $pagina);
     
     if ($data) {
         $cache->set($cacheKey, $data, $ttl);

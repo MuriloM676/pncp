@@ -13,7 +13,7 @@ $rateLimiter = new RateLimiter($cache, $config['rate_limit']['max'], $config['ra
 $publicKey = getenv('PNCP_PUBLIC_KEY');
 $client = new PNCPClient($config['pncp']['base_url'], $publicKey);
 require_once __DIR__ . '/lib/compras-client.php';
-$comprasClient = new ComprasGovClient($config['pncp']['base_url']);
+$comprasClient = new ComprasGovClient($config['comprasgov']['base_url']);
 
 // Rate Limit por IP
 $ip = $_SERVER['REMOTE_ADDR'];

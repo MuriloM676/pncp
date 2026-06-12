@@ -8,6 +8,8 @@
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         [x-cloak] { display: none !important; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen">
@@ -18,7 +20,6 @@
             <nav class="flex space-x-1 bg-slate-200 p-1 rounded-lg w-fit">
                 <button @click="activeTab = 'oportunidades'" :class="activeTab === 'oportunidades' ? 'bg-white shadow text-blue-700' : 'text-slate-600 hover:text-slate-900'" class="py-2.5 px-6 font-semibold rounded-md transition-all">Oportunidades</button>
                 <button @click="activeTab = 'materiais'" :class="activeTab === 'materiais' ? 'bg-white shadow text-blue-700' : 'text-slate-600 hover:text-slate-900'" class="py-2.5 px-6 font-semibold rounded-md transition-all">Materiais</button>
-                <button @click="activeTab = 'contratos'" :class="activeTab === 'contratos' ? 'bg-white shadow text-blue-700' : 'text-slate-600 hover:text-slate-900'" class="py-2.5 px-6 font-semibold rounded-md transition-all">Contratos</button>
             </nav>
         </header>
 
@@ -38,7 +39,7 @@
         <div x-show="activeTab === 'oportunidades'" x-cloak class="space-y-6">
             <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <h2 class="text-xl font-bold text-slate-800">Oportunidades Recentes</h2>
-                <select x-model="filterUf" @change="fetchOportunidades()" class="bg-slate-50 border border-slate-300 rounded-lg py-2 px-4 focus:ring-2 focus:ring-blue-500">
+                <select x-model="filterUf" @change="currentPage = 1; fetchOportunidades()" class="bg-slate-50 border border-slate-300 rounded-lg py-2 px-4 focus:ring-2 focus:ring-blue-500">
                     <option value="">Brasil (Todos)</option>
                     <template x-for="uf in ufs" :key="uf">
                         <option :value="uf" x-text="uf"></option>
@@ -47,7 +48,7 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <template x-for="op in oportunidades" :key="op.idCompra">
-                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow cursor-pointer" @click="openModal(op)">
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow cursor-pointer flex flex-col h-full" @click="openModal(op)">
                         <div class="flex justify-between items-start mb-4">
                             <span class="bg-blue-50 text-blue-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider" x-text="op.unidadeOrgaoUfSigla"></span>
                             <span class="text-slate-400 text-xs font-medium" x-text="formatDate(op.dataPublicacaoPncp)"></span>
@@ -62,6 +63,13 @@
                     </div>
                 </template>
             </div>
+
+            <!-- Paginação -->
+            <div class="flex justify-center items-center space-x-4 mt-8">
+                <button @click="if(currentPage > 1) { currentPage--; fetchOportunidades(); }" :disabled="currentPage === 1" :class="currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-100'" class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 transition-colors">Anterior</button>
+                <span class="text-sm font-medium text-slate-600" x-text="'Página ' + currentPage + ' de ' + totalPages"></span>
+                <button @click="if(currentPage < totalPages) { currentPage++; fetchOportunidades(); }" :disabled="currentPage >= totalPages" :class="currentPage >= totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-100'" class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 transition-colors">Próxima</button>
+            </div>
         </div>
 
         <!-- Conteúdo: Materiais -->
@@ -69,8 +77,8 @@
             <div class="bg-white p-6 rounded-lg shadow mb-6">
                 <h2 class="text-xl font-bold mb-4">Catálogo de Materiais</h2>
                 <div class="flex gap-4">
-                    <button @click="tipoMaterial = 'grupos'; fetchMateriais()" class="px-4 py-2 bg-blue-800 text-white rounded">Grupos</button>
-                    <button @click="tipoMaterial = 'classes'; fetchMateriais()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded">Classes</button>
+                    <button @click="tipoMaterial = 'grupos'; fetchMateriais()" :class="tipoMaterial === 'grupos' ? 'bg-blue-800 text-white' : 'bg-gray-200 text-gray-800'" class="px-4 py-2 rounded transition-colors">Grupos</button>
+                    <button @click="tipoMaterial = 'classes'; fetchMateriais()" :class="tipoMaterial === 'classes' ? 'bg-blue-800 text-white' : 'bg-gray-200 text-gray-800'" class="px-4 py-2 rounded transition-colors">Classes</button>
                 </div>
             </div>
 
@@ -97,67 +105,122 @@
         <!-- Modal de Detalhes -->
         <div x-show="modalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50" @keydown.escape.window="modalOpen = false">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" @click.away="modalOpen = false">
-                <div class="p-6 border-b flex justify-between items-center">
-                    <h3 class="text-xl font-bold text-gray-800" x-text="'Processo ' + (processoDetalhe?.numeroLicitacao || '')"></h3>
-                    <button @click="modalOpen = false" class="text-gray-500 hover:text-gray-800">
+                <div class="p-6 border-b flex justify-between items-center bg-slate-50">
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800" x-text="'Processo ' + (processoDetalhe?.numeroLicitacao || '')"></h3>
+                        <p class="text-xs text-slate-500 mt-1" x-text="processoDetalhe?.nomeOrgao"></p>
+                    </div>
+                    <button @click="modalOpen = false" class="text-slate-400 hover:text-slate-600 transition-colors">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
+
+                <!-- Modal Tabs -->
+                <div class="flex border-b overflow-x-auto no-scrollbar bg-white">
+                    <button @click="modalTab = 'detalhes'" :class="modalTab === 'detalhes' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-6 py-3 border-b-2 font-medium text-sm whitespace-nowrap transition-all">Detalhes</button>
+                    <button @click="modalTab = 'itens'" :class="modalTab === 'itens' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-6 py-3 border-b-2 font-medium text-sm whitespace-nowrap transition-all">Itens PNCP</button>
+                    <button @click="modalTab = 'anexos'" :class="modalTab === 'anexos' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-6 py-3 border-b-2 font-medium text-sm whitespace-nowrap transition-all">Anexos <span class="ml-1 px-1.5 py-0.5 bg-slate-100 rounded-full text-xs" x-text="anexos.length"></span></button>
+                    <button @click="modalTab = 'status'" :class="modalTab === 'status' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-6 py-3 border-b-2 font-medium text-sm whitespace-nowrap transition-all">Histórico</button>
+                </div>
                 
-                <div class="p-6 overflow-y-auto flex-grow">
-                    <div x-show="modalLoading" class="flex justify-center py-8">
-                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-800"></div>
+                <div class="p-6 overflow-y-auto flex-grow bg-white">
+                    <div x-show="modalLoading" class="flex justify-center py-12">
+                        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-800"></div>
                     </div>
                     
-                    <div x-show="!modalLoading && processoDetalhe" class="space-y-6">
-                        <section>
-                            <h4 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">Objeto</h4>
-                            <p class="text-gray-800 leading-relaxed" x-text="processoDetalhe?.objeto"></p>
-                        </section>
+                    <div x-show="!modalLoading && processoDetalhe" class="space-y-8">
+                        
+                        <!-- Aba: Detalhes -->
+                        <div x-show="modalTab === 'detalhes'" class="space-y-6">
+                            <section>
+                                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Objeto da Compra</h4>
+                                <p class="text-slate-700 leading-relaxed text-lg" x-text="processoDetalhe?.objeto"></p>
+                            </section>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <h4 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-1">Órgão</h4>
-                                <p x-text="processoDetalhe?.nomeOrgao"></p>
-                            </div>
-                            <div>
-                                <h4 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-1">Localidade</h4>
-                                <p x-text="processoDetalhe?.municipioNome + ' / ' + processoDetalhe?.siglaUf"></p>
-                            </div>
-                            <div>
-                                <h4 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-1">Valor Estimado</h4>
-                                <p class="text-lg font-bold text-green-600" x-text="formatCurrency(processoDetalhe?.valorEstimado)"></p>
-                            </div>
-                            <div>
-                                <h4 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-1">Data de Abertura</h4>
-                                <p x-text="formatDate(processoDetalhe?.dataAberturaPropostas)"></p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-6 rounded-2xl">
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Localidade</h4>
+                                    <p class="font-semibold" x-text="processoDetalhe?.municipioNome + ' / ' + processoDetalhe?.siglaUf"></p>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Valor Estimado</h4>
+                                    <p class="text-2xl font-black text-green-600" x-text="formatCurrency(processoDetalhe?.valorEstimado)"></p>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Abertura Propostas</h4>
+                                    <p class="font-semibold" x-text="formatDate(processoDetalhe?.dataAberturaPropostas)"></p>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Nº Controle PNCP</h4>
+                                    <p class="font-mono text-xs break-all" x-text="processoDetalhe?.numeroControlePNCP"></p>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Itens em Disputa / Lances -->
-                        <section x-show="disputas.length > 0">
-                            <h4 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Itens em Disputa</h4>
-                            <div class="border rounded-lg overflow-hidden">
-                                <table class="min-w-full divide-y divide-gray-200">
-                                    <thead class="bg-gray-50">
+                        <!-- Aba: Itens (Ex-Disputas) -->
+                        <div x-show="modalTab === 'itens'" class="space-y-4">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Itens da Contratação (PNCP)</h4>
+                            <div x-show="disputas.length === 0" class="text-center py-8 text-slate-500 italic">Nenhum item encontrado.</div>
+                            <div x-show="disputas.length > 0" class="border rounded-xl overflow-hidden shadow-sm">
+                                <table class="min-w-full divide-y divide-slate-200">
+                                    <thead class="bg-slate-50">
                                         <tr>
-                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Item</th>
-                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Descrição</th>
-                                            <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Melhor Lance</th>
+                                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Nº</th>
+                                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Descrição</th>
+                                            <th class="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase">Valor Total</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="bg-white divide-y divide-gray-200">
-                                        <template x-for="item in disputas" :key="item.idItem">
-                                            <tr>
-                                                <td class="px-4 py-2 text-sm text-gray-900" x-text="item.numeroItem"></td>
-                                                <td class="px-4 py-2 text-sm text-gray-500" x-text="item.descricao"></td>
-                                                <td class="px-4 py-2 text-sm text-right font-bold text-blue-600" x-text="formatCurrency(item.valorMelhorLance)"></td>
+                                    <tbody class="bg-white divide-y divide-slate-200">
+                                        <template x-for="item in disputas" :key="item.numeroItem">
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="px-6 py-4 text-sm font-bold text-slate-900" x-text="item.numeroItem"></td>
+                                                <td class="px-6 py-4 text-sm text-slate-600" x-text="item.descricao"></td>
+                                                <td class="px-6 py-4 text-sm text-right font-black text-blue-600" x-text="formatCurrency(item.valorTotalEstimado)"></td>
                                             </tr>
                                         </template>
                                     </tbody>
                                 </table>
                             </div>
-                        </section>
+                        </div>
+
+                        <!-- Aba: Anexos -->
+                        <div x-show="modalTab === 'anexos'" class="space-y-4">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Documentos e Anexos</h4>
+                            <div x-show="anexos.length === 0" class="text-center py-8 text-slate-500 italic">Nenhum anexo encontrado.</div>
+                            <div class="grid grid-cols-1 gap-3">
+                                <template x-for="(anexo, index) in anexos" :key="index">
+                                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors border border-slate-200">
+                                        <div class="flex items-center space-x-4">
+                                            <div class="p-2 bg-white rounded-lg shadow-sm">
+                                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-semibold text-slate-900" x-text="anexo.titulo || anexo.nomeArquivo"></p>
+                                                <p class="text-xs text-slate-500" x-text="formatDate(anexo.dataPublicacao)"></p>
+                                            </div>
+                                        </div>
+                                        <a :href="anexo.url" target="_blank" class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors">Visualizar</a>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Aba: Timeline (Status) -->
+                        <div x-show="modalTab === 'status'" class="space-y-6">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Histórico de Eventos</h4>
+                            <div x-show="statusHistorico.length === 0" class="text-center py-8 text-slate-500 italic">Histórico indisponível.</div>
+                            <div class="relative pl-8 space-y-8 before:absolute before:inset-0 before:left-[11px] before:w-0.5 before:bg-slate-200">
+                                <template x-for="(status, index) in statusHistorico" :key="index">
+                                    <div class="relative">
+                                        <div class="absolute -left-8 mt-1.5 w-6 h-6 rounded-full border-4 border-white shadow-sm" :class="index === 0 ? 'bg-blue-600' : 'bg-slate-300'"></div>
+                                        <div>
+                                            <p class="text-sm font-bold text-slate-900" x-text="status.historicoStatusNome"></p>
+                                            <p class="text-xs text-slate-500 mt-1" x-text="formatDate(status.dataAtualizacao)"></p>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -177,17 +240,29 @@
                 filterUf: '',
                 activeTab: 'oportunidades',
                 countdown: 300,
+                currentPage: 1,
+                totalPages: 1,
                 modalOpen: false,
                 modalLoading: false,
+                modalTab: 'detalhes',
                 processoDetalhe: null,
                 disputas: [],
+                anexos: [],
+                statusHistorico: [],
                 ufs: ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'],
-                apiUrl: 'http://localhost:8080',
+                apiUrl: '/api', // Usar proxy se possível, ou URL completa
 
                 materiais: [],
                 tipoMaterial: 'grupos',
                 
                 init() {
+                    // Ajuste da URL da API dinâmico para evitar problemas de localhost
+                    if (window.location.hostname === 'localhost') {
+                        this.apiUrl = 'http://localhost:8080';
+                    } else {
+                        this.apiUrl = window.location.origin + ':8080';
+                    }
+
                     this.fetchOportunidades();
                     this.fetchMateriais();
                     setInterval(() => {
@@ -200,15 +275,12 @@
                 },
 
                 async fetchMateriais() {
-                    this.loading = true;
                     try {
                         const res = await fetch(`${this.apiUrl}/materiais-consulta?tipo=${this.tipoMaterial}`);
                         const data = await res.json();
-                        this.materiais = data.resultado || [];
+                        this.materiais = Array.isArray(data) ? data : (data.resultado || []);
                     } catch (e) {
                         console.error('Erro ao carregar materiais:', e);
-                    } finally {
-                        this.loading = false;
                     }
                 },
 
@@ -216,12 +288,14 @@
                     this.loading = true;
                     this.error = null;
                     try {
-                        const response = await fetch(`${this.apiUrl}/oportunidades?uf=${this.filterUf}`);
+                        const response = await fetch(`${this.apiUrl}/oportunidades?uf=${this.filterUf}&pagina=${this.currentPage}`);
                         if (!response.ok) {
                             const errData = await response.json();
                             throw new Error(errData.error || 'Falha ao carregar oportunidades');
                         }
-                        this.oportunidades = await response.json();
+                        const data = await response.json();
+                        this.oportunidades = data.resultado || [];
+                        this.totalPages = data.totalPaginas || 1;
                         this.countdown = 300;
                     } catch (e) {
                         this.error = e.message;
@@ -233,24 +307,47 @@
                 async openModal(op) {
                     this.modalOpen = true;
                     this.modalLoading = true;
-                    this.processoDetalhe = null;
+                    this.modalTab = 'detalhes';
+                    this.processoDetalhe = {
+                        objeto: op.objetoCompra,
+                        nomeOrgao: op.orgaoEntidadeRazaoSocial,
+                        municipioNome: op.unidadeOrgaoMunicipioNome,
+                        siglaUf: op.unidadeOrgaoUfSigla,
+                        valorEstimado: op.valorTotalEstimado,
+                        dataAberturaPropostas: op.dataAberturaPropostaPncp,
+                        numeroLicitacao: op.numeroCompra,
+                        numeroControlePNCP: op.numeroControlePNCP
+                    };
                     this.disputas = [];
+                    this.anexos = [];
+                    this.statusHistorico = [];
                     
                     try {
-                        const resProc = await fetch(`${this.apiUrl}/processo?id=${op.idCompra}`);
-                        if (resProc.ok) {
-                            const data = await resProc.json();
-                            const item = Array.isArray(data) ? data[0] : data;
-                            this.processoDetalhe = {
-                                objeto: item.objetoCompra,
-                                nomeOrgao: item.orgaoEntidadeRazaoSocial,
-                                municipioNome: item.unidadeOrgaoMunicipioNome,
-                                siglaUf: item.unidadeOrgaoUfSigla,
-                                valorEstimado: item.valorTotalEstimado,
-                                dataAberturaPropostas: item.dataAberturaPropostaPncp,
-                                numeroLicitacao: item.numeroCompra
-                            };
+                        // Parâmetros PNCP: cnpj, ano, sequencial
+                        const cnpj = op.orgaoEntidadeCnpj;
+                        const ano = op.anoCompraPncp;
+                        const seq = op.sequencialCompraPncp;
+                        const params = `cnpj=${cnpj}&ano=${ano}&sequencial=${seq}`;
+
+                        const [resAnexos, resStatus, resDisputa] = await Promise.all([
+                            fetch(`${this.apiUrl}/anexos?${params}`),
+                            fetch(`${this.apiUrl}/status?${params}`),
+                            fetch(`${this.apiUrl}/disputa?${params}`)
+                        ]);
+
+                        if (resAnexos.ok) {
+                            const data = await resAnexos.ok ? await resAnexos.json() : [];
+                            this.anexos = Array.isArray(data) ? data : [];
                         }
+                        if (resStatus.ok) {
+                            const data = await resStatus.json();
+                            this.statusHistorico = Array.isArray(data) ? data : [];
+                        }
+                        if (resDisputa.ok) {
+                            const data = await resDisputa.json();
+                            this.disputas = Array.isArray(data) ? data : [];
+                        }
+
                     } catch (e) {
                         console.error('Erro ao carregar detalhes:', e);
                     } finally {
