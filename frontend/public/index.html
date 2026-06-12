@@ -1,267 +1,673 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-br" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal PNCP - Oportunidades</title>
+    <title>Portal PNCP - Inteligência em Contratações Públicas</title>
+    <!-- Google Fonts: Outfit and Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         [x-cloak] { display: none !important; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        h1, h2, h3, h4, .font-display {
+            font-family: 'Outfit', sans-serif;
+        }
     </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            850: '#1e293b',
+                            900: '#0f172a',
+                            950: '#020617',
+                        },
+                        emerald: {
+                            500: '#10b981',
+                            600: '#059669',
+                            400: '#34d399',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen">
-    <div x-data="pncpApp()" x-init="init()" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <header class="mb-10">
-            <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight mb-6">Painel Compras.gov.br</h1>
-            
-            <nav class="flex space-x-1 bg-slate-200 p-1 rounded-lg w-fit">
-                <button @click="activeTab = 'oportunidades'" :class="activeTab === 'oportunidades' ? 'bg-white shadow text-blue-700' : 'text-slate-600 hover:text-slate-900'" class="py-2.5 px-6 font-semibold rounded-md transition-all">Oportunidades</button>
-                <button @click="activeTab = 'materiais'" :class="activeTab === 'materiais' ? 'bg-white shadow text-blue-700' : 'text-slate-600 hover:text-slate-900'" class="py-2.5 px-6 font-semibold rounded-md transition-all">Materiais</button>
+<body class="bg-slate-950 text-slate-100 min-h-screen selection:bg-emerald-500/30 selection:text-emerald-300">
+    <div x-data="pncpApp()" x-init="init()" class="flex flex-col md:flex-row min-h-screen">
+        
+        <!-- Sidebar -->
+        <aside class="w-full md:w-72 bg-slate-900 border-b md:border-b-0 md:border-r border-slate-800 flex flex-col shrink-0">
+            <!-- Header/Logo -->
+            <div class="p-6 border-b border-slate-800 flex items-center space-x-3">
+                <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                    <svg class="w-6 h-6 text-slate-950" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m4-3H6" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-white leading-none">PNCP Monitor</h1>
+                    <span class="text-[10px] text-emerald-400 font-semibold tracking-wider uppercase">Painel Inteligente</span>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="flex-grow p-4 space-y-1">
+                <button @click="activeTab = 'oportunidades'" 
+                        :class="activeTab === 'oportunidades' ? 'bg-slate-800 text-white border-l-4 border-emerald-500' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-100 border-l-4 border-transparent'" 
+                        class="flex items-center space-x-3 w-full px-4 py-3 rounded-lg font-medium transition-all text-left">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                    <span>Oportunidades</span>
+                </button>
+                <button @click="activeTab = 'materiais'" 
+                        :class="activeTab === 'materiais' ? 'bg-slate-800 text-white border-l-4 border-emerald-500' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-100 border-l-4 border-transparent'" 
+                        class="flex items-center space-x-3 w-full px-4 py-3 rounded-lg font-medium transition-all text-left">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                    <span>Catálogo de Materiais</span>
+                </button>
             </nav>
-        </header>
 
-        <!-- Loading State -->
-        <div x-show="loading" class="flex justify-center py-12">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-800"></div>
-        </div>
-
-        <!-- Error State -->
-        <div x-show="error" x-cloak class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6">
-            <strong class="font-bold">Erro!</strong>
-            <span class="block sm:inline" x-text="error"></span>
-            <button @click="fetchOportunidades()" class="underline ml-2">Tentar novamente</button>
-        </div>
-
-        <!-- Conteúdo: Oportunidades -->
-        <div x-show="activeTab === 'oportunidades'" x-cloak class="space-y-6">
-            <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                <h2 class="text-xl font-bold text-slate-800">Oportunidades Recentes</h2>
-                <div class="flex gap-2">
-                    <input type="text" x-model="filterCidade" placeholder="Nome Cidade" class="bg-slate-50 border border-slate-300 rounded-lg py-2 px-4 focus:ring-2 focus:ring-blue-500 w-32">
-                    <input type="text" x-model="filterIbge" placeholder="Cód. IBGE" class="bg-slate-50 border border-slate-300 rounded-lg py-2 px-4 focus:ring-2 focus:ring-blue-500 w-28">
-                    <select x-model="filterUf" @change="currentPage = 1; fetchOportunidades()" class="bg-slate-50 border border-slate-300 rounded-lg py-2 px-4 focus:ring-2 focus:ring-blue-500">
-                        <option value="">Brasil (Todos)</option>
-                        <template x-for="uf in ufs" :key="uf">
-                            <option :value="uf" x-text="uf"></option>
-                        </template>
-                    </select>
-                    <button @click="currentPage = 1; fetchOportunidades()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700">Filtrar</button>
-                </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <template x-for="op in oportunidades" :key="op.idCompra">
-                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow cursor-pointer flex flex-col h-full" @click="openModal(op)">
-                        <div class="flex justify-between items-start mb-4">
-                            <span class="bg-blue-50 text-blue-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider" x-text="op.unidadeOrgaoUfSigla"></span>
-                            <span class="text-slate-400 text-xs font-medium" x-text="formatDate(op.dataPublicacaoPncp)"></span>
-                        </div>
-                        <h3 class="text-base font-semibold text-slate-900 mb-2 line-clamp-3 leading-snug" x-text="op.objetoCompra"></h3>
-                        <p class="text-sm text-slate-500 mb-6 truncate" x-text="op.orgaoEntidadeRazaoSocial"></p>
-                        
-                        <div class="mt-auto pt-4 border-t border-slate-100 flex justify-between items-center">
-                            <span class="text-blue-700 font-bold" x-text="formatCurrency(op.valorTotalEstimado)"></span>
-                            <span class="text-xs font-mono text-slate-400" x-text="op.numeroCompra"></span>
-                        </div>
+            <!-- Health Status Panel -->
+            <div class="p-4 border-t border-slate-800 bg-slate-900/50">
+                <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Status do Sistema</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-slate-400">API Gateway</span>
+                        <span class="flex items-center text-emerald-400 font-medium">
+                            <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse mr-1.5"></span>
+                            Online
+                        </span>
                     </div>
-                </template>
-            </div>
-
-            <!-- Paginação -->
-            <div class="flex justify-center items-center space-x-4 mt-8">
-                <button @click="if(currentPage > 1) { currentPage--; fetchOportunidades(); }" :disabled="currentPage === 1" :class="currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-100'" class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 transition-colors">Anterior</button>
-                <span class="text-sm font-medium text-slate-600" x-text="'Página ' + currentPage + ' de ' + totalPages"></span>
-                <button @click="if(currentPage < totalPages) { currentPage++; fetchOportunidades(); }" :disabled="currentPage >= totalPages" :class="currentPage >= totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-100'" class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 transition-colors">Próxima</button>
-            </div>
-        </div>
-
-        <!-- Conteúdo: Materiais -->
-        <div x-show="activeTab === 'materiais'" x-cloak>
-            <div class="bg-white p-6 rounded-lg shadow mb-6">
-                <h2 class="text-xl font-bold mb-4">Catálogo de Materiais</h2>
-                <div class="flex gap-4 mb-4">
-                    <button @click="tipoMaterial = 'grupos'; fetchMateriais()" :class="tipoMaterial === 'grupos' ? 'bg-blue-800 text-white' : 'bg-gray-200 text-gray-800'" class="px-4 py-2 rounded transition-colors">Grupos</button>
-                    <button @click="tipoMaterial = 'classes'; fetchMateriais()" :class="tipoMaterial === 'classes' ? 'bg-blue-800 text-white' : 'bg-gray-200 text-gray-800'" class="px-4 py-2 rounded transition-colors">Classes</button>
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-slate-400">Cache Redis</span>
+                        <span class="flex items-center text-emerald-400 font-medium">
+                            <span class="h-2 w-2 rounded-full bg-emerald-500 mr-1.5"></span>
+                            Ativo
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs border-t border-slate-800 pt-2.5">
+                        <span class="text-slate-400">Atualização em</span>
+                        <span class="font-mono text-emerald-400 font-bold" x-text="formatCountdown(countdown)">05:00</span>
+                    </div>
                 </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-grow flex flex-col min-w-0 bg-slate-950">
+            
+            <!-- Navbar/Header -->
+            <header class="h-20 border-b border-slate-800 bg-slate-900/30 backdrop-blur-md px-8 flex items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold text-white tracking-tight" x-text="activeTab === 'oportunidades' ? 'Painel de Contratações Públicas' : 'Catálogo de Materiais'"></h2>
+                    <p class="text-sm text-slate-400">Consulta unificada e monitoramento em tempo real (Lei 14.133/2021)</p>
+                </div>
+            </header>
+
+            <!-- Scrollable Content wrapper -->
+            <div class="flex-grow overflow-y-auto p-8">
                 
-                <div class="flex gap-2">
-                    <input type="text" x-model="searchTerm" @keyup.enter="fetchMaterialSearch()" placeholder="Pesquisar descrição de material..." class="border border-slate-300 rounded px-4 py-2 flex-grow">
-                    <button @click="fetchMaterialSearch()" class="bg-blue-600 text-white px-6 py-2 rounded font-bold hover:bg-blue-700">Buscar</button>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <table class="min-w-full divide-y divide-slate-200">
-                    <thead class="bg-slate-50">
-                        <tr>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider" x-text="searchTerm ? 'PDM' : 'Código'"></th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider" x-text="searchTerm ? 'Descrição' : (tipoMaterial === 'grupos' ? 'Nome do Grupo' : 'Nome da Classe')"></th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-200 bg-white">
-                        <template x-for="item in (searchTerm ? materialSearchResults : materiais)" :key="tipoMaterial === 'grupos' ? item.codigoGrupo : (searchTerm ? item.id : item.codigoClasse)">
-                            <tr class="hover:bg-slate-50 transition-colors">
-                                <td class="px-6 py-4 text-sm font-semibold text-slate-900" x-text="searchTerm ? item.id : (tipoMaterial === 'grupos' ? item.codigoGrupo : item.codigoClasse)"></td>
-                                <td class="px-6 py-4 text-sm text-slate-600" x-text="searchTerm ? item.descricao : (tipoMaterial === 'grupos' ? item.nomeGrupo : item.nomeClasse)"></td>
-                            </tr>
-                        </template>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Modal de Detalhes -->
-        <div x-show="modalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50" @keydown.escape.window="modalOpen = false">
-            <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" @click.away="modalOpen = false">
-                <div class="p-6 border-b flex justify-between items-center bg-slate-50">
-                    <div>
-                        <h3 class="text-xl font-bold text-slate-800" x-text="'Processo ' + (processoDetalhe?.numeroLicitacao || '')"></h3>
-                        <p class="text-xs text-slate-500 mt-1" x-text="processoDetalhe?.nomeOrgao"></p>
+                <!-- Loading State -->
+                <div x-show="loading" class="flex flex-col justify-center items-center py-24 space-y-4">
+                    <div class="relative w-16 h-16">
+                        <div class="absolute inset-0 rounded-full border-4 border-slate-800"></div>
+                        <div class="absolute inset-0 rounded-full border-4 border-emerald-500 border-t-transparent animate-spin"></div>
                     </div>
-                    <button @click="modalOpen = false" class="text-slate-400 hover:text-slate-600 transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
+                    <p class="text-slate-400 text-sm">Carregando dados das contratações públicas...</p>
                 </div>
 
-                <!-- Modal Tabs -->
-                <div class="flex border-b overflow-x-auto no-scrollbar bg-white">
-                    <button @click="modalTab = 'detalhes'" :class="modalTab === 'detalhes' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-6 py-3 border-b-2 font-medium text-sm whitespace-nowrap transition-all">Detalhes</button>
-                    <button @click="modalTab = 'itens'" :class="modalTab === 'itens' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-6 py-3 border-b-2 font-medium text-sm whitespace-nowrap transition-all">Itens PNCP</button>
-                    <button @click="modalTab = 'anexos'" :class="modalTab === 'anexos' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-6 py-3 border-b-2 font-medium text-sm whitespace-nowrap transition-all">Anexos <span class="ml-1 px-1.5 py-0.5 bg-slate-100 rounded-full text-xs" x-text="anexos.length"></span></button>
-                    <button @click="modalTab = 'status'" :class="modalTab === 'status' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-6 py-3 border-b-2 font-medium text-sm whitespace-nowrap transition-all">Histórico</button>
-                    <button @click="modalTab = 'disputa'" :class="modalTab === 'disputa' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-6 py-3 border-b-2 font-medium text-sm whitespace-nowrap transition-all">Disputas</button>
-                </div>
-                
-                <div class="p-6 overflow-y-auto flex-grow bg-white">
-                    <div x-show="modalLoading" class="flex justify-center py-12">
-                        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-800"></div>
+                <!-- Error State -->
+                <div x-show="error" x-cloak class="bg-red-500/10 border border-red-500/30 text-red-200 px-6 py-4 rounded-xl mb-8 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <svg class="w-6 h-6 text-red-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <div>
+                            <strong class="font-bold">Erro de Conectividade!</strong>
+                            <span class="block text-sm text-red-300" x-text="error"></span>
+                        </div>
                     </div>
+                    <button @click="fetchOportunidades()" class="bg-red-500/20 hover:bg-red-500/35 text-red-200 font-semibold px-4 py-2 rounded-lg transition-colors border border-red-500/40 text-sm">Tentar novamente</button>
+                </div>
+
+                <!-- Tab: Oportunidades -->
+                <div x-show="activeTab === 'oportunidades'" x-cloak class="space-y-6">
                     
-                    <div x-show="!modalLoading && processoDetalhe" class="space-y-8">
+                    <!-- Advanced Filter Panel -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+                        <div class="absolute top-0 right-0 h-40 w-40 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
+                        <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4 flex items-center">
+                            <svg class="w-4 h-4 mr-2 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                            </svg>
+                            Filtros Avançados de Busca
+                        </h3>
                         
-                        <!-- Aba: Detalhes -->
-                        <div x-show="modalTab === 'detalhes'" class="space-y-6">
-                            <section>
-                                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Objeto da Compra</h4>
-                                <p class="text-slate-700 leading-relaxed text-lg" x-text="processoDetalhe?.objeto"></p>
-                            </section>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <!-- Objeto / Descrição -->
+                            <div class="space-y-1.5">
+                                <label class="text-xs text-slate-400 font-medium">Palavra-chave / Objeto</label>
+                                <input type="text" x-model="filterBusca" @keyup.enter="applyFilters()" placeholder="Ex: tecnologia, segurança, alimento" class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 px-4 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 placeholder-slate-600 text-white">
+                            </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-6 rounded-2xl">
-                                <div>
-                                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Localidade</h4>
-                                    <p class="font-semibold" x-text="processoDetalhe?.municipioNome + ' / ' + processoDetalhe?.siglaUf"></p>
-                                </div>
-                                <div>
-                                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Valor Estimado</h4>
-                                    <p class="text-2xl font-black text-green-600" x-text="formatCurrency(processoDetalhe?.valorEstimado)"></p>
-                                </div>
-                                <div>
-                                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Abertura Propostas</h4>
-                                    <p class="font-semibold" x-text="formatDate(processoDetalhe?.dataAberturaPropostas)"></p>
-                                </div>
-                                <div>
-                                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Nº Controle PNCP</h4>
-                                    <p class="font-mono text-xs break-all" x-text="processoDetalhe?.numeroControlePNCP"></p>
-                                </div>
+                            <!-- UF Estado -->
+                            <div class="space-y-1.5">
+                                <label class="text-xs text-slate-400 font-medium">Estado (UF)</label>
+                                <select x-model="filterUf" @change="applyFilters()" class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 px-4 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-white">
+                                    <option value="">Brasil (Todos)</option>
+                                    <template x-for="uf in ufs" :key="uf">
+                                        <option :value="uf" x-text="uf"></option>
+                                    </template>
+                                </select>
+                            </div>
+
+                            <!-- Código IBGE -->
+                            <div class="space-y-1.5">
+                                <label class="text-xs text-slate-400 font-medium">Código IBGE Município</label>
+                                <input type="text" x-model="filterIbge" @keyup.enter="applyFilters()" placeholder="Ex: 3550308" class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 px-4 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 placeholder-slate-600 text-white">
+                            </div>
+
+                            <!-- Modalidade de Licitação -->
+                            <div class="space-y-1.5">
+                                <label class="text-xs text-slate-400 font-medium">Modalidade</label>
+                                <select x-model="filterModalidade" @change="applyFilters()" class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 px-4 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-white">
+                                    <option value="">Todas as Modalidades</option>
+                                    <template x-for="mod in modalidades" :key="mod.id">
+                                        <option :value="mod.id" x-text="mod.nome"></option>
+                                    </template>
+                                </select>
                             </div>
                         </div>
 
-                        <!-- Aba: Itens (Ex-Disputas) -->
-                        <div x-show="modalTab === 'itens'" class="space-y-4">
-                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Itens da Contratação (PNCP)</h4>
-                            <div x-show="itens.length === 0" class="text-center py-8 text-slate-500 italic">Nenhum item encontrado.</div>
-                            <div x-show="itens.length > 0" class="border rounded-xl overflow-hidden shadow-sm">
-                                <table class="min-w-full divide-y divide-slate-200">
-                                    <thead class="bg-slate-50">
-                                        <tr>
-                                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Nº</th>
-                                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Descrição</th>
-                                            <th class="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase">Valor Total</th>
+                        <!-- Secondary Filters row -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 pt-4 border-t border-slate-800">
+                            <!-- Data Início -->
+                            <div class="space-y-1.5">
+                                <label class="text-xs text-slate-400 font-medium">Publicação Inicial</label>
+                                <input type="date" x-model="filterDataInicial" @change="applyFilters()" class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 px-4 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-white">
+                            </div>
+
+                            <!-- Data Fim -->
+                            <div class="space-y-1.5">
+                                <label class="text-xs text-slate-400 font-medium">Publicação Final</label>
+                                <input type="date" x-model="filterDataFinal" @change="applyFilters()" class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 px-4 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-white">
+                            </div>
+
+                            <!-- Empty spacer for desktop -->
+                            <div class="hidden lg:block"></div>
+
+                            <!-- Action Buttons -->
+                            <div class="flex items-end space-x-2">
+                                <button @click="clearFilters()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 py-2.5 px-4 rounded-xl text-sm font-semibold transition-colors border border-slate-700">Limpar</button>
+                                <button @click="applyFilters()" class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 py-2.5 px-4 rounded-xl text-sm font-extrabold shadow-lg shadow-emerald-500/15 transition-all">Buscar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Opportunities Grid -->
+                    <div x-show="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <template x-for="op in oportunidades" :key="op.idCompra">
+                            <div class="bg-slate-900 border border-slate-800 hover:border-slate-700/80 rounded-2xl p-6 shadow-lg hover:shadow-emerald-500/5 transition-all duration-300 cursor-pointer flex flex-col h-full group relative overflow-hidden" 
+                                 @click="openModal(op)">
+                                
+                                <!-- Card Header -->
+                                <div class="flex justify-between items-center mb-4">
+                                    <span class="bg-emerald-500/10 text-emerald-400 text-xs font-semibold px-2.5 py-1 rounded-md border border-emerald-500/20 uppercase tracking-wider" x-text="op.unidadeOrgaoUfSigla"></span>
+                                    <span class="text-slate-400 text-xs font-medium" x-text="formatDateOnly(op.dataPublicacaoPncp)"></span>
+                                </div>
+                                
+                                <!-- Card Body -->
+                                <div class="mb-4">
+                                    <!-- Modality Badge -->
+                                    <div class="mb-2">
+                                        <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider bg-slate-800 px-2 py-0.5 rounded" x-text="op.modalidadeNome"></span>
+                                    </div>
+                                    <h3 class="text-base font-bold text-white mb-2 line-clamp-3 group-hover:text-emerald-400 transition-colors leading-snug" x-text="op.objetoCompra"></h3>
+                                    <p class="text-xs text-slate-400 truncate mb-1" x-text="op.orgaoEntidadeRazaoSocial"></p>
+                                    <p class="text-[10px] text-slate-500 truncate" x-text="op.unidadeOrgaoNomeUnidade"></p>
+                                </div>
+
+                                <!-- Card Footer -->
+                                <div class="mt-auto pt-4 border-t border-slate-800 flex justify-between items-end">
+                                    <div>
+                                        <p class="text-[10px] text-slate-500 uppercase font-semibold">Valor Estimado</p>
+                                        <p class="text-lg font-black text-emerald-400" x-text="formatCurrency(op.valorTotalEstimado)"></p>
+                                    </div>
+                                    <span class="text-[10px] font-mono text-slate-500 bg-slate-950 px-2 py-1 rounded" x-text="op.numeroCompra"></span>
+                                </div>
+
+                                <!-- Subtle glow indicator on hover -->
+                                <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- No Results -->
+                    <div x-show="!loading && oportunidades.length === 0" class="text-center py-20 bg-slate-900 border border-slate-800 rounded-2xl">
+                        <svg class="w-16 h-16 mx-auto text-slate-700 mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <h4 class="text-lg font-semibold text-slate-300 mb-1">Nenhuma contratação encontrada</h4>
+                        <p class="text-slate-500 text-sm">Tente redefinir seus filtros ou alterar os termos de busca.</p>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div x-show="!loading && totalPages > 1" class="flex justify-center items-center space-x-2 mt-8">
+                        <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1" 
+                                :class="currentPage === 1 ? 'opacity-35 cursor-not-allowed bg-slate-900' : 'bg-slate-900 hover:bg-slate-800 border-slate-800 hover:border-slate-700'" 
+                                class="p-2.5 border rounded-xl text-slate-300 transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        
+                        <span class="text-sm font-semibold text-slate-400 bg-slate-900 px-4 py-2.5 border border-slate-800 rounded-xl" x-text="'Página ' + currentPage + ' de ' + totalPages"></span>
+                        
+                        <button @click="changePage(currentPage + 1)" :disabled="currentPage >= totalPages" 
+                                :class="currentPage >= totalPages ? 'opacity-35 cursor-not-allowed bg-slate-900' : 'bg-slate-900 hover:bg-slate-800 border-slate-800 hover:border-slate-700'" 
+                                class="p-2.5 border rounded-xl text-slate-300 transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tab: Materiais -->
+                <div x-show="activeTab === 'materiais'" x-cloak class="space-y-6">
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+                        <div class="absolute top-0 right-0 h-40 w-40 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
+                        <h3 class="text-lg font-bold text-white mb-4">Catálogo de Grupos & Classes de Materiais</h3>
+                        
+                        <div class="flex flex-col md:flex-row gap-4 mb-6">
+                            <div class="flex p-1 bg-slate-950 border border-slate-800 rounded-xl w-fit">
+                                <button @click="tipoMaterial = 'grupos'; fetchMateriais()" :class="tipoMaterial === 'grupos' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'" class="py-2.5 px-6 font-semibold rounded-lg transition-all text-sm">Grupos</button>
+                                <button @click="tipoMaterial = 'classes'; fetchMateriais()" :class="tipoMaterial === 'classes' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'" class="py-2.5 px-6 font-semibold rounded-lg transition-all text-sm">Classes</button>
+                            </div>
+                            
+                            <div class="flex flex-grow gap-2">
+                                <input type="text" x-model="searchTerm" @keyup.enter="fetchMaterialSearch()" placeholder="Pesquisar descrição detalhada do material (ex: papel, notebook)..." class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm flex-grow text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+                                <button @click="fetchMaterialSearch()" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 px-6 py-2.5 rounded-xl font-bold transition-all shadow-md">Buscar</button>
+                            </div>
+                        </div>
+
+                        <!-- Table -->
+                        <div class="border border-slate-800 rounded-xl overflow-hidden bg-slate-950/50">
+                            <table class="min-w-full divide-y divide-slate-880">
+                                <thead class="bg-slate-900/40">
+                                    <tr>
+                                        <th class="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider" x-text="searchTerm ? 'ID PDM' : 'Código'"></th>
+                                        <th class="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider" x-text="searchTerm ? 'Descrição do PDM' : (tipoMaterial === 'grupos' ? 'Nome do Grupo' : 'Nome da Classe')"></th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-850 bg-transparent">
+                                    <template x-for="item in (searchTerm ? materialSearchResults : materiais)" :key="tipoMaterial === 'grupos' ? item.codigoGrupo : (searchTerm ? item.id : item.codigoClasse)">
+                                        <tr class="hover:bg-slate-900/30 transition-colors">
+                                            <td class="px-6 py-4 text-sm font-semibold text-emerald-400" x-text="searchTerm ? item.id : (tipoMaterial === 'grupos' ? item.codigoGrupo : item.codigoClasse)"></td>
+                                            <td class="px-6 py-4 text-sm text-slate-300" x-text="searchTerm ? item.descricao : (tipoMaterial === 'grupos' ? item.nomeGrupo : item.nomeClasse)"></td>
                                         </tr>
-                                    </thead>
-                                    <tbody class="bg-white divide-y divide-slate-200">
-                                        <template x-for="item in itens" :key="item.numeroItem">
-                                            <tr class="hover:bg-slate-50">
-                                                <td class="px-6 py-4 text-sm font-bold text-slate-900" x-text="item.numeroItem"></td>
-                                                <td class="px-6 py-4 text-sm text-slate-600" x-text="item.descricao"></td>
-                                                <td class="px-6 py-4 text-sm text-right font-black text-blue-600" x-text="formatCurrency(item.valorTotalEstimado)"></td>
-                                            </tr>
-                                        </template>
-                                    </tbody>
-                                </table>
+                                    </template>
+                                </tbody>
+                            </table>
+                            
+                            <!-- Table empty state -->
+                            <div x-show="(searchTerm ? materialSearchResults : materiais).length === 0" class="text-center py-12 text-slate-500 italic text-sm">
+                                Nenhum material encontrado.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Detalhes Completo -->
+    <div x-show="modalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" @keydown.escape.window="modalOpen = false">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col relative animate-in fade-in zoom-in-95 duration-200" @click.away="modalOpen = false">
+            
+            <!-- Modal Header -->
+            <div class="p-6 border-b border-slate-800 flex justify-between items-start bg-slate-950/20">
+                <div>
+                    <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/15" x-text="processoDetalhe?.siglaUf"></span>
+                    <h3 class="text-xl font-bold text-white mt-2" x-text="'Processo ' + (processoDetalhe?.numeroLicitacao || '')"></h3>
+                    <p class="text-sm text-slate-400 mt-1" x-text="processoDetalhe?.nomeOrgao"></p>
+                </div>
+                <button @click="modalOpen = false" class="text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 p-2 rounded-lg transition-colors border border-slate-700/60">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Modal Navigation Tabs -->
+            <div class="flex border-b border-slate-800 overflow-x-auto no-scrollbar bg-slate-900/50">
+                <button @click="modalTab = 'detalhes'" :class="modalTab === 'detalhes' ? 'border-emerald-500 text-emerald-400 bg-slate-950/30' : 'border-transparent text-slate-400 hover:text-white'" class="px-6 py-3.5 border-b-2 font-semibold text-sm whitespace-nowrap transition-all flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    Detalhes
+                </button>
+                <button @click="modalTab = 'itens'" :class="modalTab === 'itens' ? 'border-emerald-500 text-emerald-400 bg-slate-950/30' : 'border-transparent text-slate-400 hover:text-white'" class="px-6 py-3.5 border-b-2 font-semibold text-sm whitespace-nowrap transition-all flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+                    Itens e Ganhadores <span class="ml-2 px-2 py-0.5 bg-slate-800 rounded-full text-xs text-slate-300" x-text="itens.length"></span>
+                </button>
+                <button @click="modalTab = 'anexos'" :class="modalTab === 'anexos' ? 'border-emerald-500 text-emerald-400 bg-slate-950/30' : 'border-transparent text-slate-400 hover:text-white'" class="px-6 py-3.5 border-b-2 font-semibold text-sm whitespace-nowrap transition-all flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    Documentos <span class="ml-2 px-2 py-0.5 bg-slate-800 rounded-full text-xs text-slate-300" x-text="anexos.length"></span>
+                </button>
+                <button @click="modalTab = 'fontes'" :class="modalTab === 'fontes' ? 'border-emerald-500 text-emerald-400 bg-slate-950/30' : 'border-transparent text-slate-400 hover:text-white'" class="px-6 py-3.5 border-b-2 font-semibold text-sm whitespace-nowrap transition-all flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    Orçamento
+                </button>
+                <button @click="modalTab = 'status'" :class="modalTab === 'status' ? 'border-emerald-500 text-emerald-400 bg-slate-950/30' : 'border-transparent text-slate-400 hover:text-white'" class="px-6 py-3.5 border-b-2 font-semibold text-sm whitespace-nowrap transition-all flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    Histórico
+                </button>
+            </div>
+            
+            <!-- Modal Content (Scrollable) -->
+            <div class="p-8 overflow-y-auto flex-grow bg-slate-950/10">
+                <div x-show="modalLoading" class="flex flex-col justify-center items-center py-20 space-y-3">
+                    <div class="w-10 h-10 border-4 border-slate-800 border-t-emerald-500 rounded-full animate-spin"></div>
+                    <p class="text-slate-400 text-sm">Carregando detalhes do processo...</p>
+                </div>
+                
+                <div x-show="!modalLoading && processoDetalhe" class="space-y-6">
+                    
+                    <!-- Aba: Detalhes -->
+                    <div x-show="modalTab === 'detalhes'" class="space-y-6">
+                        <section class="bg-slate-900/50 p-6 border border-slate-800/80 rounded-2xl">
+                            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Objeto da Compra</h4>
+                            <p class="text-slate-200 leading-relaxed text-base" x-text="processoDetalhe?.objeto"></p>
+                        </section>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div class="bg-slate-900/50 p-5 border border-slate-800/80 rounded-2xl flex flex-col justify-between">
+                                <span class="text-xs font-semibold text-slate-500 uppercase">Valor Total Estimado</span>
+                                <span class="text-2xl font-black text-emerald-400 mt-2" x-text="formatCurrency(processoDetalhe?.valorEstimado)"></span>
+                            </div>
+                            <div class="bg-slate-900/50 p-5 border border-slate-800/80 rounded-2xl flex flex-col justify-between">
+                                <span class="text-xs font-semibold text-slate-500 uppercase">Abertura de Propostas</span>
+                                <span class="text-sm font-bold text-slate-200 mt-2" x-text="formatDate(processoDetalhe?.dataAberturaPropostas)"></span>
+                            </div>
+                            <div class="bg-slate-900/50 p-5 border border-slate-800/80 rounded-2xl flex flex-col justify-between">
+                                <span class="text-xs font-semibold text-slate-500 uppercase">Localidade</span>
+                                <span class="text-sm font-bold text-slate-200 mt-2" x-text="(processoDetalhe?.municipioNome || 'Não informado') + ' - ' + (processoDetalhe?.siglaUf || '')"></span>
+                            </div>
+                            <div class="bg-slate-900/50 p-5 border border-slate-800/80 rounded-2xl flex flex-col justify-between">
+                                <span class="text-xs font-semibold text-slate-500 uppercase">Situação da Compra</span>
+                                <span class="text-sm font-bold mt-2" :class="currentOp?.situacaoCompraIdPncp === 1 ? 'text-emerald-400' : 'text-slate-300'" x-text="currentOp?.situacaoCompraNomePncp || 'Divulgada'"></span>
                             </div>
                         </div>
 
-                        <!-- Aba: Disputas -->
-                        <div x-show="modalTab === 'disputa'" class="space-y-4">
-                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Itens em Disputa</h4>
-                            <div x-show="disputas.length === 0" class="text-center py-8 text-slate-500 italic">Nenhuma disputa ativa.</div>
-                            <div x-show="disputas.length > 0" class="border rounded-xl overflow-hidden shadow-sm">
-                                <table class="min-w-full divide-y divide-slate-200">
-                                    <thead class="bg-slate-50">
-                                        <tr>
-                                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Item</th>
-                                            <th class="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase">Melhor Lance</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="bg-white divide-y divide-slate-200">
-                                        <template x-for="item in disputas" :key="item.numeroItem">
-                                            <tr class="hover:bg-slate-50">
-                                                <td class="px-6 py-4 text-sm font-bold text-slate-900" x-text="item.numeroItem"></td>
-                                                <td class="px-6 py-4 text-sm text-right font-black text-green-600" x-text="formatCurrency(item.melhorLanceValor)"></td>
-                                            </tr>
-                                        </template>
-                                    </tbody>
-                                </table>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Outras informações -->
+                            <div class="bg-slate-900/50 p-6 border border-slate-800/80 rounded-2xl space-y-4">
+                                <h4 class="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800 pb-2">Identificação do Processo</h4>
+                                <div class="grid grid-cols-2 gap-4 text-xs">
+                                    <div>
+                                        <p class="text-slate-500 font-medium">Controle PNCP</p>
+                                        <p class="text-slate-300 font-mono select-all break-all mt-1" x-text="processoDetalhe?.numeroControlePNCP"></p>
+                                    </div>
+                                    <div>
+                                        <p class="text-slate-500 font-medium">Órgão Comprador (CNPJ)</p>
+                                        <p class="text-slate-300 font-mono mt-1" x-text="currentOp?.orgaoEntidadeCnpj"></p>
+                                    </div>
+                                    <div>
+                                        <p class="text-slate-500 font-medium">Amparo Legal</p>
+                                        <p class="text-slate-300 mt-1" x-text="currentOp?.amparoLegalNome || 'Não informado'"></p>
+                                    </div>
+                                    <div>
+                                        <p class="text-slate-500 font-medium">Esfera / Poder</p>
+                                        <p class="text-slate-300 mt-1" x-text="(currentOp?.orgaoEntidadeEsferaId === 'F' ? 'Federal' : currentOp?.orgaoEntidadeEsferaId === 'E' ? 'Estadual' : 'Municipal') + ' / Executivo'"></p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Links e orientações -->
+                            <div class="bg-slate-900/50 p-6 border border-slate-800/80 rounded-2xl space-y-4 flex flex-col justify-between">
+                                <div>
+                                    <h4 class="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800 pb-2">Informações Adicionais</h4>
+                                    <p class="text-xs text-slate-300 leading-relaxed mt-2" x-text="currentOp?.informacaoComplementar || 'Nenhuma informação complementar cadastrada no portal.'"></p>
+                                </div>
+                                <div class="pt-4 border-t border-slate-800 flex space-x-2">
+                                    <a :href="'https://pncp.gov.br/app/editais/' + currentOp?.orgaoEntidadeCnpj + '/' + currentOp?.anoCompraPncp + '/' + currentOp?.sequencialCompraPncp" 
+                                       target="_blank" 
+                                       class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 py-2.5 px-4 rounded-xl text-xs font-bold text-center transition-colors">Visualizar no Portal Oficial</a>
+                                </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Aba: Anexos -->
-                        <div x-show="modalTab === 'anexos'" class="space-y-4">
-                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Documentos e Anexos</h4>
-                            <div x-show="anexos.length === 0" class="text-center py-8 text-slate-500 italic">Nenhum anexo encontrado.</div>
-                            <div class="grid grid-cols-1 gap-3">
-                                <template x-for="(anexo, index) in anexos" :key="index">
-                                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors border border-slate-200">
-                                        <div class="flex items-center space-x-4">
-                                            <div class="p-2 bg-white rounded-lg shadow-sm">
-                                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    <!-- Aba: Itens e Ganhadores -->
+                    <div x-show="modalTab === 'itens'" class="space-y-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest">Itens da Contratação</h4>
+                            <p class="text-xs text-slate-500">Clique em um item com resultado homologado para ver os ganhadores.</p>
+                        </div>
+                        
+                        <div x-show="itens.length === 0" class="text-center py-12 text-slate-500 italic bg-slate-900/20 border border-slate-800 rounded-xl">
+                            Nenhum item encontrado nesta contratação.
+                        </div>
+
+                        <!-- Accordion List -->
+                        <div x-show="itens.length > 0" class="space-y-3">
+                            <template x-for="item in itens" :key="item.numeroItem">
+                                <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden transition-all duration-200" 
+                                     :class="expandedItem === item.numeroItem ? 'ring-1 ring-emerald-500/30 border-slate-700' : ''">
+                                    
+                                    <!-- Accordion Header -->
+                                    <div class="p-4 flex items-center justify-between cursor-pointer hover:bg-slate-850/50 transition-colors select-none"
+                                         @click="toggleItem(item)">
+                                        <div class="flex items-center space-x-4 min-w-0 flex-grow">
+                                            <span class="text-slate-500 font-bold font-mono bg-slate-950 px-2.5 py-1 rounded-md text-xs shrink-0" x-text="'Item ' + item.numeroItem"></span>
+                                            <p class="text-sm font-semibold text-slate-200 truncate pr-4" x-text="item.descricao"></p>
+                                        </div>
+                                        
+                                        <div class="flex items-center space-x-4 shrink-0">
+                                            <!-- Result Badge -->
+                                            <span x-show="item.temResultado" class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold px-2 py-0.5 rounded">Possui Ganhador</span>
+                                            <span x-show="!item.temResultado" class="bg-slate-850 text-slate-400 border border-slate-800 text-[10px] font-bold px-2 py-0.5 rounded">Sem Ganhador</span>
+                                            
+                                            <div class="text-right">
+                                                <p class="text-[10px] text-slate-500 uppercase font-medium">Valor Total</p>
+                                                <p class="text-sm font-black text-slate-200" x-text="formatCurrency(item.valorTotal)"></p>
+                                            </div>
+                                            
+                                            <svg class="w-5 h-5 text-slate-400 transition-transform duration-200"
+                                                 :class="expandedItem === item.numeroItem ? 'transform rotate-180 text-emerald-400' : ''"
+                                                 fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </div>
+                                    </div>
+
+                                    <!-- Accordion Content -->
+                                    <div x-show="expandedItem === item.numeroItem" 
+                                         x-collapse x-cloak
+                                         class="p-5 bg-slate-950/40 border-t border-slate-850 space-y-4">
+                                        
+                                        <!-- Item details grid -->
+                                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-900/40 p-4 rounded-xl border border-slate-850">
+                                            <div>
+                                                <span class="text-[10px] text-slate-500 uppercase font-semibold">Tipo</span>
+                                                <p class="text-xs font-semibold text-slate-300 mt-0.5" x-text="item.materialOuServicoNome || 'Serviço'"></p>
                                             </div>
                                             <div>
-                                                <p class="text-sm font-semibold text-slate-900" x-text="anexo.titulo || anexo.nomeArquivo"></p>
-                                                <p class="text-xs text-slate-500" x-text="formatDate(anexo.dataPublicacao)"></p>
+                                                <span class="text-[10px] text-slate-500 uppercase font-semibold">Quantidade</span>
+                                                <p class="text-xs font-semibold text-slate-300 mt-0.5" x-text="item.quantidade + ' ' + (item.unidadeMedida || 'UN')"></p>
+                                            </div>
+                                            <div>
+                                                <span class="text-[10px] text-slate-500 uppercase font-semibold">Valor Unit. Estimado</span>
+                                                <p class="text-xs font-semibold text-slate-300 mt-0.5" x-text="formatCurrency(item.valorUnitarioEstimado)"></p>
+                                            </div>
+                                            <div>
+                                                <span class="text-[10px] text-slate-500 uppercase font-semibold">Critério de Julgamento</span>
+                                                <p class="text-xs font-semibold text-slate-300 mt-0.5" x-text="item.criterioJulgamentoNome || 'Menor preço'"></p>
                                             </div>
                                         </div>
-                                        <a :href="anexo.url" target="_blank" class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors">Visualizar</a>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
 
-                        <!-- Aba: Timeline (Status) -->
-                        <div x-show="modalTab === 'status'" class="space-y-6">
-                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Histórico de Eventos</h4>
-                            <div x-show="statusHistorico.length === 0" class="text-center py-8 text-slate-500 italic">Histórico indisponível.</div>
-                            <div class="relative pl-8 space-y-8 before:absolute before:inset-0 before:left-[11px] before:w-0.5 before:bg-slate-200">
-                                <template x-for="(status, index) in statusHistorico" :key="index">
-                                    <div class="relative">
-                                        <div class="absolute -left-8 mt-1.5 w-6 h-6 rounded-full border-4 border-white shadow-sm" :class="index === 0 ? 'bg-blue-600' : 'bg-slate-300'"></div>
+                                        <!-- Item Description (Complete) -->
                                         <div>
-                                            <p class="text-sm font-bold text-slate-900" x-text="status.historicoStatusNome"></p>
-                                            <p class="text-xs text-slate-500 mt-1" x-text="formatDate(status.dataAtualizacao)"></p>
+                                            <span class="text-[10px] text-slate-500 uppercase font-semibold">Descrição Detalhada</span>
+                                            <p class="text-xs text-slate-300 mt-1 leading-relaxed" x-text="item.descricao"></p>
+                                        </div>
+
+                                        <!-- Winners Section -->
+                                        <div class="pt-2 border-t border-slate-850">
+                                            <h5 class="text-xs font-bold text-white uppercase tracking-wider mb-3 flex items-center">
+                                                <svg class="w-4 h-4 mr-1.5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                                                </svg>
+                                                Resultado da Homologação (Vencedor)
+                                            </h5>
+
+                                            <!-- Loading Winners -->
+                                            <div x-show="itemResultadosLoading[item.numeroItem]" class="flex items-center space-x-2 py-4 justify-center">
+                                                <div class="w-4 h-4 border-2 border-slate-800 border-t-emerald-500 rounded-full animate-spin"></div>
+                                                <p class="text-xs text-slate-500">Buscando fornecedor homologado...</p>
+                                            </div>
+
+                                            <!-- Winners List -->
+                                            <div x-show="!itemResultadosLoading[item.numeroItem] && itemResultados[item.numeroItem] && itemResultados[item.numeroItem].length > 0" class="overflow-x-auto border border-slate-850 rounded-lg">
+                                                <table class="min-w-full divide-y divide-slate-850 bg-slate-900/20">
+                                                    <thead class="bg-slate-900/60">
+                                                        <tr class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">
+                                                            <th class="px-4 py-3 text-left">Fornecedor</th>
+                                                            <th class="px-4 py-3 text-left">Porte</th>
+                                                            <th class="px-4 py-3 text-right">Qtd Homologada</th>
+                                                            <th class="px-4 py-3 text-right">Unit. Homologado</th>
+                                                            <th class="px-4 py-3 text-right">Total Homologado</th>
+                                                            <th class="px-4 py-3 text-right">Economia</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody class="divide-y divide-slate-850 text-xs">
+                                                        <template x-for="res in itemResultados[item.numeroItem]" :key="res.cnpjVencedor">
+                                                            <tr class="text-slate-300 hover:bg-slate-850/30">
+                                                                <td class="px-4 py-3 min-w-0">
+                                                                    <p class="font-bold text-slate-200" x-text="res.razaoSocial"></p>
+                                                                    <p class="font-mono text-[10px] text-slate-500 mt-0.5" x-text="formatCnpj(res.cnpjVencedor)"></p>
+                                                                </td>
+                                                                <td class="px-4 py-3 text-slate-400" x-text="res.porteFornecedor || 'N/I'"></td>
+                                                                <td class="px-4 py-3 text-right" x-text="res.quantidade"></td>
+                                                                <td class="px-4 py-3 text-right font-semibold text-slate-200" x-text="formatCurrency(res.valorUnitario)"></td>
+                                                                <td class="px-4 py-3 text-right font-black text-emerald-400" x-text="formatCurrency(res.valorTotal)"></p>
+                                                                <td class="px-4 py-3 text-right">
+                                                                    <span class="bg-emerald-500/10 text-emerald-400 font-bold px-2 py-0.5 rounded border border-emerald-500/20" 
+                                                                          x-text="calculateSavings(item.valorUnitarioEstimado, res.valorUnitario)">
+                                                                    </span>
+                                                                </td>
+                                                            </tr>
+                                                        </template>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            <!-- No Winner info cached or returned -->
+                                            <div x-show="!itemResultadosLoading[item.numeroItem] && (!itemResultados[item.numeroItem] || itemResultados[item.numeroItem].length === 0)" 
+                                                 class="text-xs text-slate-500 italic py-2">
+                                                Nenhum ganhador registrado para este item (o processo pode estar em andamento ou o resultado não foi publicado no PNCP ainda).
+                                            </div>
                                         </div>
                                     </div>
-                                </template>
-                            </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Aba: Fontes de Orçamento -->
+                    <div x-show="modalTab === 'fontes'" class="space-y-4">
+                        <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3">Fontes Orçamentárias da Contratação</h4>
+                        
+                        <div x-show="fontesLoading" class="flex items-center space-x-2 py-8 justify-center">
+                            <div class="w-6 h-6 border-2 border-slate-800 border-t-emerald-500 rounded-full animate-spin"></div>
+                            <p class="text-xs text-slate-500">Consultando fontes no PNCP...</p>
+                        </div>
+
+                        <div x-show="!fontesLoading && fontesOrcamentarias.length === 0" class="text-center py-12 text-slate-500 italic bg-slate-900/20 border border-slate-800 rounded-xl">
+                            Nenhuma fonte orçamentária detalhada foi vinculada a esta contratação.
+                        </div>
+
+                        <div x-show="!fontesLoading && fontesOrcamentarias.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <template x-for="fonte in fontesOrcamentarias" :key="fonte.id">
+                                <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-3">
+                                    <div class="flex justify-between items-start">
+                                        <span class="bg-slate-800 text-slate-300 font-bold font-mono text-xs px-2.5 py-1 rounded" x-text="'Fonte ID: ' + (fonte.id || fonte.fonteOrcamentariaId)"></span>
+                                    </div>
+                                    <div class="text-xs space-y-1.5">
+                                        <p class="text-slate-400"><span class="font-bold text-slate-500">Exercício:</span> <span class="text-slate-200" x-text="fonte.exercicioFinanceiro || 'N/A'"></span></p>
+                                        <p class="text-slate-400"><span class="font-bold text-slate-500">Função:</span> <span class="text-slate-200" x-text="fonte.funcaoCodigo + ' - ' + (fonte.funcaoNome || 'N/A')"></span></p>
+                                        <p class="text-slate-400"><span class="font-bold text-slate-500">Subfunção:</span> <span class="text-slate-200" x-text="fonte.subfuncaoCodigo + ' - ' + (fonte.subfuncaoNome || 'N/A')"></span></p>
+                                        <p class="text-slate-400"><span class="font-bold text-slate-500">Programa:</span> <span class="text-slate-200" x-text="fonte.programaCodigo + ' - ' + (fonte.programaNome || 'N/A')"></span></p>
+                                        <p class="text-slate-400"><span class="font-bold text-slate-500">Ação:</span> <span class="text-slate-200" x-text="fonte.acaoCodigo + ' - ' + (fonte.acaoNome || 'N/A')"></span></p>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Aba: Anexos -->
+                    <div x-show="modalTab === 'anexos'" class="space-y-4">
+                        <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3">Documentos e Arquivos do Processo</h4>
+                        <div x-show="anexos.length === 0" class="text-center py-12 text-slate-500 italic bg-slate-900/20 border border-slate-800 rounded-xl">
+                            Nenhum anexo encontrado para esta licitação.
+                        </div>
+                        <div class="grid grid-cols-1 gap-3">
+                            <template x-for="(anexo, index) in anexos" :key="index">
+                                <div class="flex items-center justify-between p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-slate-700 transition-colors">
+                                    <div class="flex items-center space-x-4 min-w-0 pr-4">
+                                        <div class="p-2.5 bg-slate-950 border border-slate-850 rounded-lg text-emerald-400 shrink-0 shadow-sm">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <p class="text-sm font-bold text-slate-200 truncate" x-text="anexo.titulo || anexo.nomeArquivo"></p>
+                                            <p class="text-[10px] text-slate-500 mt-1" x-text="'Publicado em ' + formatDate(anexo.dataPublicacao)"></p>
+                                        </div>
+                                    </div>
+                                    <a :href="anexo.url" target="_blank" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-4 py-2 rounded-lg text-xs border border-slate-700 transition-colors shrink-0">Baixar Documento</a>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Aba: Histórico (Timeline) -->
+                    <div x-show="modalTab === 'status'" class="space-y-6">
+                        <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6">Linha do Tempo do Processo</h4>
+                        <div x-show="statusHistorico.length === 0" class="text-center py-12 text-slate-500 italic bg-slate-900/20 border border-slate-800 rounded-xl">
+                            Histórico de eventos não disponível no momento.
+                        </div>
+                        <div class="relative pl-8 space-y-8 before:absolute before:inset-0 before:left-[11px] before:w-0.5 before:bg-slate-800">
+                            <template x-for="(status, index) in statusHistorico" :key="index">
+                                <div class="relative">
+                                    <!-- Dot indicators -->
+                                    <div class="absolute -left-8 mt-1.5 w-6 h-6 rounded-full border-4 border-slate-950 shadow-md flex items-center justify-center" 
+                                         :class="index === 0 ? 'bg-emerald-500 ring-2 ring-emerald-500/20' : 'bg-slate-700'">
+                                    </div>
+                                    <div class="bg-slate-900/60 border border-slate-850 p-4 rounded-xl">
+                                        <p class="text-sm font-bold text-white" x-text="status.historicoStatusNome"></p>
+                                        <p class="text-xs text-slate-500 mt-1" x-text="formatDate(status.data)"></p>
+                                        <p x-show="status.descricao" class="text-xs text-slate-400 mt-2 leading-relaxed bg-slate-950/40 p-2.5 rounded border border-slate-850/60" x-text="status.descricao"></p>
+                                    </div>
+                                </div>
+                            </template>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="p-6 border-t bg-gray-50 flex justify-end">
-                    <button @click="modalOpen = false" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">Fechar</button>
-                </div>
+            <!-- Modal Footer -->
+            <div class="p-6 border-t border-slate-800 bg-slate-900/40 flex justify-end">
+                <button @click="modalOpen = false" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-750 text-slate-200 font-bold rounded-xl text-sm transition-colors">Fechar Painel</button>
             </div>
         </div>
     </div>
@@ -272,39 +678,65 @@
                 oportunidades: [],
                 loading: false,
                 error: null,
+                
+                // Filtros
                 filterUf: '',
                 filterIbge: '',
                 filterCidade: '',
+                filterBusca: '',
+                filterModalidade: '',
+                filterDataInicial: '',
+                filterDataFinal: '',
+                
+                // Listas auxiliares
+                modalidades: [],
+                
                 activeTab: 'oportunidades',
                 countdown: 300,
                 currentPage: 1,
                 totalPages: 1,
+                
+                // Modal
                 modalOpen: false,
                 modalLoading: false,
                 modalTab: 'detalhes',
+                currentOp: null,
                 processoDetalhe: null,
-                disputas: [],
+                expandedItem: null,
+                
+                // Dados detalhados da compra
                 itens: [],
                 anexos: [],
                 statusHistorico: [],
+                fontesOrcamentarias: [],
+                fontesLoading: false,
+                
+                // Resultados/Vencedores por item
+                itemResultados: {},
+                itemResultadosLoading: {},
+                
                 ufs: ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'],
-                apiUrl: '/api', // Usar proxy se possível, ou URL completa
-
+                apiUrl: '/api', // Mapeamento dinâmico no init
+                
+                // Catálogo
                 materiais: [],
                 tipoMaterial: 'grupos',
                 searchTerm: '',
                 materialSearchResults: [],
                 
                 init() {
-                    // Ajuste da URL da API dinâmico para evitar problemas de localhost
-                    if (window.location.hostname === 'localhost') {
+                    // Ajuste da URL da API dinâmico para evitar problemas de porta no docker-compose
+                    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
                         this.apiUrl = 'http://localhost:8080';
                     } else {
                         this.apiUrl = window.location.origin + ':8080';
                     }
 
+                    this.fetchModalidades();
                     this.fetchOportunidades();
                     this.fetchMateriais();
+                    
+                    // Auto-refresh a cada segundo
                     setInterval(() => {
                         if (this.countdown > 0) {
                             this.countdown--;
@@ -312,6 +744,23 @@
                             this.fetchOportunidades();
                         }
                     }, 1000);
+                },
+
+                formatCountdown(seconds) {
+                    const min = Math.floor(seconds / 60);
+                    const sec = seconds % 60;
+                    return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+                },
+
+                async fetchModalidades() {
+                    try {
+                        const res = await fetch(`${this.apiUrl}/modalidades`);
+                        if (res.ok) {
+                            this.modalidades = await res.json();
+                        }
+                    } catch (e) {
+                        console.error('Erro ao carregar lista de modalidades:', e);
+                    }
                 },
 
                 async fetchMateriais() {
@@ -322,7 +771,7 @@
                         const data = await res.json();
                         this.materiais = Array.isArray(data) ? data : (data.resultado || []);
                     } catch (e) {
-                        console.error('Erro ao carregar materiais:', e);
+                        console.error('Erro ao carregar catálogo de materiais:', e);
                     }
                 },
 
@@ -341,15 +790,28 @@
                     this.loading = true;
                     this.error = null;
                     try {
-                        const response = await fetch(`${this.apiUrl}/oportunidades?uf=${this.filterUf}&cidade_ibge=${this.filterIbge}&cidade_nome=${encodeURIComponent(this.filterCidade)}&pagina=${this.currentPage}`);
+                        const params = new URLSearchParams({
+                            uf: this.filterUf,
+                            cidade_ibge: this.filterIbge,
+                            cidade_nome: this.filterCidade,
+                            busca: this.filterBusca,
+                            modalidade: this.filterModalidade,
+                            data_inicial: this.filterDataInicial,
+                            data_final: this.filterDataFinal,
+                            pagina: this.currentPage
+                        });
+                        
+                        const response = await fetch(`${this.apiUrl}/oportunidades?${params.toString()}`);
                         if (!response.ok) {
                             const errData = await response.json();
-                            throw new Error(errData.error || 'Falha ao carregar oportunidades');
+                            throw new Error(errData.error || 'Falha ao carregar oportunidades de compras.');
                         }
                         const data = await response.json();
                         this.oportunidades = data.resultado || [];
+                        
+                        // O comprasgov retorna totalPaginas ou calculamos se houver registros
                         this.totalPages = data.totalPaginas || 1;
-                        this.countdown = 300;
+                        this.countdown = 300; // Reseta countdown de 5 minutos
                     } catch (e) {
                         this.error = e.message;
                     } finally {
@@ -357,10 +819,37 @@
                     }
                 },
 
+                applyFilters() {
+                    this.currentPage = 1;
+                    this.fetchOportunidades();
+                },
+
+                clearFilters() {
+                    this.filterUf = '';
+                    this.filterIbge = '';
+                    this.filterCidade = '';
+                    this.filterBusca = '';
+                    this.filterModalidade = '';
+                    this.filterDataInicial = '';
+                    this.filterDataFinal = '';
+                    this.currentPage = 1;
+                    this.fetchOportunidades();
+                },
+
+                changePage(page) {
+                    if (page >= 1 && page <= this.totalPages) {
+                        this.currentPage = page;
+                        this.fetchOportunidades();
+                    }
+                },
+
                 async openModal(op) {
                     this.modalOpen = true;
                     this.modalLoading = true;
                     this.modalTab = 'detalhes';
+                    this.expandedItem = null;
+                    
+                    this.currentOp = op;
                     this.processoDetalhe = {
                         objeto: op.objetoCompra,
                         nomeOrgao: op.orgaoEntidadeRazaoSocial,
@@ -371,43 +860,105 @@
                         numeroLicitacao: op.numeroCompra,
                         numeroControlePNCP: op.numeroControlePNCP
                     };
-                    this.disputas = [];
+                    
+                    // Limpar dados anteriores do modal
                     this.itens = [];
                     this.anexos = [];
                     this.statusHistorico = [];
+                    this.fontesOrcamentarias = [];
+                    this.itemResultados = {};
+                    this.itemResultadosLoading = {};
                     
                     try {
-                        // Parâmetros PNCP: cnpj, ano, sequencial
                         const cnpj = op.orgaoEntidadeCnpj;
                         const ano = op.anoCompraPncp;
                         const seq = op.sequencialCompraPncp;
                         const params = `cnpj=${cnpj}&ano=${ano}&sequencial=${seq}`;
 
-                        const [resAnexos, resStatus, resItens, resDisputas] = await Promise.all([
+                        // Executar chamadas em paralelo
+                        const [resAnexos, resStatus, resItens] = await Promise.all([
                             fetch(`${this.apiUrl}/anexos?${params}`),
                             fetch(`${this.apiUrl}/historico?${params}`),
-                            fetch(`${this.apiUrl}/itens?${params}`),
-                            fetch(`${this.apiUrl}/disputa?${params}`)
+                            fetch(`${this.apiUrl}/itens?${params}`)
                         ]);
 
                         if (resAnexos.ok) {
-                            const data = await resAnexos.ok ? await resAnexos.json() : [];
+                            const data = await resAnexos.json();
                             this.anexos = Array.isArray(data) ? data : [];
-                        }
-                        if (resDisputas.ok) {
-                            const data = await resDisputas.json();
-                            this.disputas = Array.isArray(data) ? data : [];
                         }
                         if (resStatus.ok) {
                             const data = await resStatus.json();
                             this.statusHistorico = Array.isArray(data) ? data : [];
                         }
+                        if (resItens.ok) {
+                            const data = await resItens.json();
+                            this.itens = Array.isArray(data) ? data : [];
+                        }
+
+                        // Carregar fontes de orçamento de forma independente
+                        this.fetchFontesOrcamentarias(cnpj, ano, seq);
 
                     } catch (e) {
-                        console.error('Erro ao carregar detalhes:', e);
+                        console.error('Erro ao buscar detalhes da contratação:', e);
                     } finally {
                         this.modalLoading = false;
                     }
+                },
+
+                async fetchFontesOrcamentarias(cnpj, ano, seq) {
+                    this.fontesLoading = true;
+                    try {
+                        const res = await fetch(`${this.apiUrl}/fontes-orcamentarias?cnpj=${cnpj}&ano=${ano}&sequencial=${seq}`);
+                        if (res.ok) {
+                            const data = await res.json();
+                            this.fontesOrcamentarias = Array.isArray(data) ? data : [];
+                        }
+                    } catch (e) {
+                        console.error('Erro ao buscar fontes orçamentárias:', e);
+                    } finally {
+                        this.fontesLoading = false;
+                    }
+                },
+
+                toggleItem(item) {
+                    if (this.expandedItem === item.numeroItem) {
+                        this.expandedItem = null;
+                    } else {
+                        this.expandedItem = item.numeroItem;
+                        if (item.temResultado) {
+                            this.fetchItemResultados(item.numeroItem);
+                        }
+                    }
+                },
+
+                async fetchItemResultados(numeroItem) {
+                    if (this.itemResultados[numeroItem]) return; // Já carregado
+                    this.itemResultadosLoading[numeroItem] = true;
+                    
+                    try {
+                        const cnpj = this.currentOp.orgaoEntidadeCnpj;
+                        const ano = this.currentOp.anoCompraPncp;
+                        const seq = this.currentOp.sequencialCompraPncp;
+                        const params = `cnpj=${cnpj}&ano=${ano}&sequencial=${seq}&numero_item=${numeroItem}`;
+                        
+                        const res = await fetch(`${this.apiUrl}/resultados?${params}`);
+                        if (res.ok) {
+                            const data = await res.json();
+                            this.itemResultados[numeroItem] = Array.isArray(data) ? data : [];
+                        }
+                    } catch (e) {
+                        console.error('Erro ao buscar resultados do item:', e);
+                    } finally {
+                        this.itemResultadosLoading[numeroItem] = false;
+                    }
+                },
+
+                calculateSavings(estimated, won) {
+                    if (!estimated || !won || estimated <= 0) return '0%';
+                    const diff = estimated - won;
+                    if (diff <= 0) return '0%';
+                    const perc = (diff / estimated) * 100;
+                    return `-${perc.toFixed(1)}%`;
                 },
 
                 formatCurrency(value) {
@@ -418,6 +969,20 @@
                 formatDate(dateStr) {
                     if (!dateStr) return '';
                     return new Date(dateStr).toLocaleString('pt-BR');
+                },
+
+                formatDateOnly(dateStr) {
+                    if (!dateStr) return '';
+                    const date = new Date(dateStr);
+                    const day = date.getDate().toString().padStart(2, '0');
+                    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                    const year = date.getFullYear();
+                    return `${day}/${month}/${year}`;
+                },
+
+                formatCnpj(cnpj) {
+                    if (!cnpj || cnpj.length !== 14) return cnpj;
+                    return cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5");
                 }
             }
         }

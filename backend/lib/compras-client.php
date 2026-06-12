@@ -76,10 +76,28 @@ class ComprasGovClient {
         $defaultParams = [
             'dataPublicacaoPncpInicial' => date('Y-m-d', strtotime('-30 days')),
             'dataPublicacaoPncpFinal' => date('Y-m-d'),
-            'codigoModalidade' => 5, 
         ];
+        
+        // Se a modalidade não for fornecida e não estiver definida como vazia/todas, usa a padrão (5 = Pregão)
+        if (!isset($params['codigoModalidade']) && !array_key_exists('codigoModalidade', $params)) {
+            $defaultParams['codigoModalidade'] = 5;
+        }
+
         $params = array_merge($defaultParams, $params);
-        return $this->request('modulo-contratacoes', '1_consultarContratacoes_PNCP_14133', $params);
+
+        // Limpa parâmetros nulos, vazios ou 'todos'
+        $cleanedParams = [];
+        foreach ($params as $key => $value) {
+            if ($value === null || $value === '') {
+                continue;
+            }
+            if ($key === 'codigoModalidade' && ($value === 'todos' || $value === 'all' || $value === 0 || $value === '0')) {
+                continue;
+            }
+            $cleanedParams[$key] = $value;
+        }
+
+        return $this->request('modulo-contratacoes', '1_consultarContratacoes_PNCP_14133', $cleanedParams);
     }
 
     public function getContratacaoPorId($id) {

@@ -4,6 +4,10 @@ $uf = $_GET['uf'] ?? '';
 $cidadeNome = $_GET['cidade_nome'] ?? '';
 $cidadeIbge = $_GET['cidade_ibge'] ?? ''; // Existing IBGE support
 $pagina = $_GET['pagina'] ?? 1;
+$busca = $_GET['busca'] ?? '';
+$modalidade = $_GET['modalidade'] ?? '';
+$dataInicial = $_GET['data_inicial'] ?? '';
+$dataFinal = $_GET['data_final'] ?? '';
 
 // Mapeamento de nome para IBGE, se cidade_nome for fornecido
 if ($cidadeNome && empty($cidadeIbge)) {
@@ -17,7 +21,18 @@ if ($cidadeNome && empty($cidadeIbge)) {
     }
 }
 
-$cacheKey = "oportunidades:" . ($uf ?: 'todos') . ":" . ($cidadeIbge ?: 'todos') . ":p{$pagina}";
+// Cache key contendo todos os filtros aplicados
+$cacheKeyParts = [
+    "oportunidades",
+    $uf ?: 'todos',
+    $cidadeIbge ?: 'todos',
+    $busca ? md5($busca) : 'todos',
+    $modalidade ?: 'todos',
+    $dataInicial ?: 'todos',
+    $dataFinal ?: 'todos',
+    "p{$pagina}"
+];
+$cacheKey = implode(':', $cacheKeyParts);
 $ttl = $config['cache_ttl']['oportunidades'];
 
 $data = $cache->get($cacheKey);
@@ -31,6 +46,10 @@ if (!$data) {
     ];
     if ($uf) $params['uf'] = $uf;
     if ($cidadeIbge) $params['unidadeCodigoIbge'] = $cidadeIbge;
+    if ($busca) $params['objeto'] = $busca;
+    if ($modalidade) $params['codigoModalidade'] = $modalidade;
+    if ($dataInicial) $params['dataPublicacaoPncpInicial'] = $dataInicial;
+    if ($dataFinal) $params['dataPublicacaoPncpFinal'] = $dataFinal;
     
     $data = $comprasClient->getContratacoes($params);
     
@@ -46,3 +65,4 @@ if ($data && isset($data['resultado'])) {
     $msg = ($data && isset($data['message'])) ? $data['message'] : 'Could not fetch data from Compras.gov.br API.';
     echo json_encode(['error' => $msg]);
 }
+
