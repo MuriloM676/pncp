@@ -160,8 +160,8 @@
                         <!-- Aba: Itens (Ex-Disputas) -->
                         <div x-show="modalTab === 'itens'" class="space-y-4">
                             <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Itens da Contratação (PNCP)</h4>
-                            <div x-show="disputas.length === 0" class="text-center py-8 text-slate-500 italic">Nenhum item encontrado.</div>
-                            <div x-show="disputas.length > 0" class="border rounded-xl overflow-hidden shadow-sm">
+                            <div x-show="itens.length === 0" class="text-center py-8 text-slate-500 italic">Nenhum item encontrado.</div>
+                            <div x-show="itens.length > 0" class="border rounded-xl overflow-hidden shadow-sm">
                                 <table class="min-w-full divide-y divide-slate-200">
                                     <thead class="bg-slate-50">
                                         <tr>
@@ -171,7 +171,7 @@
                                         </tr>
                                     </thead>
                                     <tbody class="bg-white divide-y divide-slate-200">
-                                        <template x-for="item in disputas" :key="item.numeroItem">
+                                        <template x-for="item in itens" :key="item.numeroItem">
                                             <tr class="hover:bg-slate-50">
                                                 <td class="px-6 py-4 text-sm font-bold text-slate-900" x-text="item.numeroItem"></td>
                                                 <td class="px-6 py-4 text-sm text-slate-600" x-text="item.descricao"></td>
@@ -247,6 +247,7 @@
                 modalTab: 'detalhes',
                 processoDetalhe: null,
                 disputas: [],
+                itens: [],
                 anexos: [],
                 statusHistorico: [],
                 ufs: ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'],
@@ -319,6 +320,7 @@
                         numeroControlePNCP: op.numeroControlePNCP
                     };
                     this.disputas = [];
+                    this.itens = [];
                     this.anexos = [];
                     this.statusHistorico = [];
                     
@@ -329,10 +331,10 @@
                         const seq = op.sequencialCompraPncp;
                         const params = `cnpj=${cnpj}&ano=${ano}&sequencial=${seq}`;
 
-                        const [resAnexos, resStatus, resDisputa] = await Promise.all([
+                        const [resAnexos, resStatus, resItens] = await Promise.all([
                             fetch(`${this.apiUrl}/anexos?${params}`),
-                            fetch(`${this.apiUrl}/status?${params}`),
-                            fetch(`${this.apiUrl}/disputa?${params}`)
+                            fetch(`${this.apiUrl}/historico?${params}`),
+                            fetch(`${this.apiUrl}/itens?${params}`)
                         ]);
 
                         if (resAnexos.ok) {
@@ -342,10 +344,6 @@
                         if (resStatus.ok) {
                             const data = await resStatus.json();
                             this.statusHistorico = Array.isArray(data) ? data : [];
-                        }
-                        if (resDisputa.ok) {
-                            const data = await resDisputa.json();
-                            this.disputas = Array.isArray(data) ? data : [];
                         }
 
                     } catch (e) {

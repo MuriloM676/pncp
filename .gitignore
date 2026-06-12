@@ -1,1 +1,9 @@
+# Security - Environment variables
+.env
+
+# Backend - Runtime logs
+backend/logs/*
+!backend/logs/.gitkeep
+
+# Ia Files
 /.specs

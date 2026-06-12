@@ -20,6 +20,18 @@ if (!$data) {
     // Rota PNCP: /v1/orgaos/{cnpj}/compras/{ano}/{sequencial}/arquivos
     $endpoint = "v1/orgaos/{$cnpj}/compras/{$ano}/{$sequencial}/arquivos";
     $data = $client->request($endpoint);
+    if (is_array($data)) {
+        $normalized = array_map(function($item) {
+            return [
+                'titulo' => $item['titulo'] ?? '',
+                'nomeArquivo' => $item['titulo'] ?? '', // Fallback
+                'dataPublicacao' => $item['dataPublicacaoPncp'] ?? '',
+                'url' => $item['url'] ?? ''
+            ];
+        }, $data);
+        $data = $normalized;
+    }
+    
     if ($data) {
         $cache->set($cacheKey, $data, $ttl);
     }
