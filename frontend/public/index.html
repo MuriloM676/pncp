@@ -39,12 +39,17 @@
         <div x-show="activeTab === 'oportunidades'" x-cloak class="space-y-6">
             <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <h2 class="text-xl font-bold text-slate-800">Oportunidades Recentes</h2>
-                <select x-model="filterUf" @change="currentPage = 1; fetchOportunidades()" class="bg-slate-50 border border-slate-300 rounded-lg py-2 px-4 focus:ring-2 focus:ring-blue-500">
-                    <option value="">Brasil (Todos)</option>
-                    <template x-for="uf in ufs" :key="uf">
-                        <option :value="uf" x-text="uf"></option>
-                    </template>
-                </select>
+                <div class="flex gap-2">
+                    <input type="text" x-model="filterCidade" placeholder="Nome Cidade" class="bg-slate-50 border border-slate-300 rounded-lg py-2 px-4 focus:ring-2 focus:ring-blue-500 w-32">
+                    <input type="text" x-model="filterIbge" placeholder="Cód. IBGE" class="bg-slate-50 border border-slate-300 rounded-lg py-2 px-4 focus:ring-2 focus:ring-blue-500 w-28">
+                    <select x-model="filterUf" @change="currentPage = 1; fetchOportunidades()" class="bg-slate-50 border border-slate-300 rounded-lg py-2 px-4 focus:ring-2 focus:ring-blue-500">
+                        <option value="">Brasil (Todos)</option>
+                        <template x-for="uf in ufs" :key="uf">
+                            <option :value="uf" x-text="uf"></option>
+                        </template>
+                    </select>
+                    <button @click="currentPage = 1; fetchOportunidades()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700">Filtrar</button>
+                </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <template x-for="op in oportunidades" :key="op.idCompra">
@@ -76,9 +81,14 @@
         <div x-show="activeTab === 'materiais'" x-cloak>
             <div class="bg-white p-6 rounded-lg shadow mb-6">
                 <h2 class="text-xl font-bold mb-4">Catálogo de Materiais</h2>
-                <div class="flex gap-4">
+                <div class="flex gap-4 mb-4">
                     <button @click="tipoMaterial = 'grupos'; fetchMateriais()" :class="tipoMaterial === 'grupos' ? 'bg-blue-800 text-white' : 'bg-gray-200 text-gray-800'" class="px-4 py-2 rounded transition-colors">Grupos</button>
                     <button @click="tipoMaterial = 'classes'; fetchMateriais()" :class="tipoMaterial === 'classes' ? 'bg-blue-800 text-white' : 'bg-gray-200 text-gray-800'" class="px-4 py-2 rounded transition-colors">Classes</button>
+                </div>
+                
+                <div class="flex gap-2">
+                    <input type="text" x-model="searchTerm" @keyup.enter="fetchMaterialSearch()" placeholder="Pesquisar descrição de material..." class="border border-slate-300 rounded px-4 py-2 flex-grow">
+                    <button @click="fetchMaterialSearch()" class="bg-blue-600 text-white px-6 py-2 rounded font-bold hover:bg-blue-700">Buscar</button>
                 </div>
             </div>
 
@@ -86,15 +96,15 @@
                 <table class="min-w-full divide-y divide-slate-200">
                     <thead class="bg-slate-50">
                         <tr>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Código</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider" x-text="tipoMaterial === 'grupos' ? 'Nome do Grupo' : 'Nome da Classe'"></th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider" x-text="searchTerm ? 'PDM' : 'Código'"></th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider" x-text="searchTerm ? 'Descrição' : (tipoMaterial === 'grupos' ? 'Nome do Grupo' : 'Nome da Classe')"></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200 bg-white">
-                        <template x-for="item in materiais" :key="tipoMaterial === 'grupos' ? item.codigoGrupo : item.codigoClasse">
+                        <template x-for="item in (searchTerm ? materialSearchResults : materiais)" :key="tipoMaterial === 'grupos' ? item.codigoGrupo : (searchTerm ? item.id : item.codigoClasse)">
                             <tr class="hover:bg-slate-50 transition-colors">
-                                <td class="px-6 py-4 text-sm font-semibold text-slate-900" x-text="tipoMaterial === 'grupos' ? item.codigoGrupo : item.codigoClasse"></td>
-                                <td class="px-6 py-4 text-sm text-slate-600" x-text="tipoMaterial === 'grupos' ? item.nomeGrupo : item.nomeClasse"></td>
+                                <td class="px-6 py-4 text-sm font-semibold text-slate-900" x-text="searchTerm ? item.id : (tipoMaterial === 'grupos' ? item.codigoGrupo : item.codigoClasse)"></td>
+                                <td class="px-6 py-4 text-sm text-slate-600" x-text="searchTerm ? item.descricao : (tipoMaterial === 'grupos' ? item.nomeGrupo : item.nomeClasse)"></td>
                             </tr>
                         </template>
                     </tbody>
@@ -121,6 +131,7 @@
                     <button @click="modalTab = 'itens'" :class="modalTab === 'itens' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-6 py-3 border-b-2 font-medium text-sm whitespace-nowrap transition-all">Itens PNCP</button>
                     <button @click="modalTab = 'anexos'" :class="modalTab === 'anexos' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-6 py-3 border-b-2 font-medium text-sm whitespace-nowrap transition-all">Anexos <span class="ml-1 px-1.5 py-0.5 bg-slate-100 rounded-full text-xs" x-text="anexos.length"></span></button>
                     <button @click="modalTab = 'status'" :class="modalTab === 'status' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-6 py-3 border-b-2 font-medium text-sm whitespace-nowrap transition-all">Histórico</button>
+                    <button @click="modalTab = 'disputa'" :class="modalTab === 'disputa' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-6 py-3 border-b-2 font-medium text-sm whitespace-nowrap transition-all">Disputas</button>
                 </div>
                 
                 <div class="p-6 overflow-y-auto flex-grow bg-white">
@@ -183,6 +194,30 @@
                             </div>
                         </div>
 
+                        <!-- Aba: Disputas -->
+                        <div x-show="modalTab === 'disputa'" class="space-y-4">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Itens em Disputa</h4>
+                            <div x-show="disputas.length === 0" class="text-center py-8 text-slate-500 italic">Nenhuma disputa ativa.</div>
+                            <div x-show="disputas.length > 0" class="border rounded-xl overflow-hidden shadow-sm">
+                                <table class="min-w-full divide-y divide-slate-200">
+                                    <thead class="bg-slate-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Item</th>
+                                            <th class="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase">Melhor Lance</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-slate-200">
+                                        <template x-for="item in disputas" :key="item.numeroItem">
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="px-6 py-4 text-sm font-bold text-slate-900" x-text="item.numeroItem"></td>
+                                                <td class="px-6 py-4 text-sm text-right font-black text-green-600" x-text="formatCurrency(item.melhorLanceValor)"></td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
                         <!-- Aba: Anexos -->
                         <div x-show="modalTab === 'anexos'" class="space-y-4">
                             <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Documentos e Anexos</h4>
@@ -238,6 +273,8 @@
                 loading: false,
                 error: null,
                 filterUf: '',
+                filterIbge: '',
+                filterCidade: '',
                 activeTab: 'oportunidades',
                 countdown: 300,
                 currentPage: 1,
@@ -255,6 +292,8 @@
 
                 materiais: [],
                 tipoMaterial: 'grupos',
+                searchTerm: '',
+                materialSearchResults: [],
                 
                 init() {
                     // Ajuste da URL da API dinâmico para evitar problemas de localhost
@@ -276,6 +315,8 @@
                 },
 
                 async fetchMateriais() {
+                    this.searchTerm = '';
+                    this.materialSearchResults = [];
                     try {
                         const res = await fetch(`${this.apiUrl}/materiais-consulta?tipo=${this.tipoMaterial}`);
                         const data = await res.json();
@@ -285,11 +326,22 @@
                     }
                 },
 
+                async fetchMaterialSearch() {
+                    if (!this.searchTerm) return;
+                    try {
+                        const res = await fetch(`${this.apiUrl}/materiais?descricao=${encodeURIComponent(this.searchTerm)}`);
+                        const data = await res.json();
+                        this.materialSearchResults = Array.isArray(data) ? data : [];
+                    } catch (e) {
+                        console.error('Erro ao buscar materiais:', e);
+                    }
+                },
+
                 async fetchOportunidades() {
                     this.loading = true;
                     this.error = null;
                     try {
-                        const response = await fetch(`${this.apiUrl}/oportunidades?uf=${this.filterUf}&pagina=${this.currentPage}`);
+                        const response = await fetch(`${this.apiUrl}/oportunidades?uf=${this.filterUf}&cidade_ibge=${this.filterIbge}&cidade_nome=${encodeURIComponent(this.filterCidade)}&pagina=${this.currentPage}`);
                         if (!response.ok) {
                             const errData = await response.json();
                             throw new Error(errData.error || 'Falha ao carregar oportunidades');
@@ -331,15 +383,20 @@
                         const seq = op.sequencialCompraPncp;
                         const params = `cnpj=${cnpj}&ano=${ano}&sequencial=${seq}`;
 
-                        const [resAnexos, resStatus, resItens] = await Promise.all([
+                        const [resAnexos, resStatus, resItens, resDisputas] = await Promise.all([
                             fetch(`${this.apiUrl}/anexos?${params}`),
                             fetch(`${this.apiUrl}/historico?${params}`),
-                            fetch(`${this.apiUrl}/itens?${params}`)
+                            fetch(`${this.apiUrl}/itens?${params}`),
+                            fetch(`${this.apiUrl}/disputa?${params}`)
                         ]);
 
                         if (resAnexos.ok) {
                             const data = await resAnexos.ok ? await resAnexos.json() : [];
                             this.anexos = Array.isArray(data) ? data : [];
+                        }
+                        if (resDisputas.ok) {
+                            const data = await resDisputas.json();
+                            this.disputas = Array.isArray(data) ? data : [];
                         }
                         if (resStatus.ok) {
                             const data = await resStatus.json();

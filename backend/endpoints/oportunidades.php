@@ -1,8 +1,23 @@
 <?php
 
 $uf = $_GET['uf'] ?? '';
+$cidadeNome = $_GET['cidade_nome'] ?? '';
+$cidadeIbge = $_GET['cidade_ibge'] ?? ''; // Existing IBGE support
 $pagina = $_GET['pagina'] ?? 1;
-$cacheKey = "oportunidades:" . ($uf ?: 'todos') . ":p{$pagina}";
+
+// Mapeamento de nome para IBGE, se cidade_nome for fornecido
+if ($cidadeNome && empty($cidadeIbge)) {
+    $cidadesFile = __DIR__ . '/../data/cidades.json';
+    if (file_exists($cidadesFile)) {
+        $cidadesMap = json_decode(file_get_contents($cidadesFile), true);
+        $key = mb_strtolower($cidadeNome);
+        if (isset($cidadesMap[$key])) {
+            $cidadeIbge = $cidadesMap[$key];
+        }
+    }
+}
+
+$cacheKey = "oportunidades:" . ($uf ?: 'todos') . ":" . ($cidadeIbge ?: 'todos') . ":p{$pagina}";
 $ttl = $config['cache_ttl']['oportunidades'];
 
 $data = $cache->get($cacheKey);
@@ -15,6 +30,7 @@ if (!$data) {
         'tamanhoPagina' => 10
     ];
     if ($uf) $params['uf'] = $uf;
+    if ($cidadeIbge) $params['unidadeCodigoIbge'] = $cidadeIbge;
     
     $data = $comprasClient->getContratacoes($params);
     
